@@ -3,19 +3,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await fetch('/api/videos');
     const videos = await res.json();
 
-    const container = document.getElementById('videos');
-    container.innerHTML = '';
-
-    videos.forEach(video => {
-      if (video.id.kind === 'youtube#video') {
-        const videoId = video.id.videoId;
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://www.youtube.com/embed/${videoId}`;
-        iframe.allowFullscreen = true;
-        container.appendChild(iframe);
-      }
-    });
+    const videoList = document.getElementById('videoList');
+    if (videos.length === 0) {
+      videoList.innerHTML = '<p>No videos found.</p>';
+    } else {
+      videoList.innerHTML = videos.map(video => {
+        return `
+          <div class="mb-4">
+            <iframe 
+              src="https://www.youtube.com/embed/${video.id.videoId || video.id}" 
+              frameborder="0" 
+              allowfullscreen 
+              class="w-100" 
+              style="height:300px;">
+            </iframe>
+            <p class="mt-2 fw-bold">${video.snippet ? video.snippet.title : video.title}</p>
+          </div>
+        `;
+      }).join('');
+    }
+    document.getElementById('loading').style.display = 'none';
   } catch (err) {
+    document.getElementById('loading').innerHTML = 'Failed to load videos.';
     console.error('Error loading videos:', err);
   }
 });
