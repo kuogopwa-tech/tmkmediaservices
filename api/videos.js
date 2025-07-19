@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const channelId = process.env.CHANNEL_ID;
 
   if (!apiKey || !channelId) {
-    return res.status(500).json({ error: 'Missing API key or Channel ID' });
+    return res.status(500).json({ error: 'Missing YOUTUBE_API_KEY or CHANNEL_ID' });
   }
 
   try {
@@ -15,12 +15,13 @@ export default async function handler(req, res) {
         channelId: channelId,
         part: 'snippet',
         order: 'date',
-        maxResults: 5,
+        maxResults: 5
       }
     });
+
     res.status(200).json(response.data.items);
   } catch (error) {
-    console.error('Failed to fetch YouTube videos:', error.message);
-    res.status(500).json({ error: 'Failed to fetch YouTube videos' });
+    console.error('YouTube API error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch videos' });
   }
 }
