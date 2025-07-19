@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tmkmediaservices</title>
+
+  <!-- SEO Meta -->
+  <meta name="description" content="tmkmediaservices - Your gateway to media, news, and entertainment.">
+  <meta name="keywords" content="Professional Event Services (tmkmediaservices)">
+  <meta name="author" content="tmkmediaservices">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+
+  <!-- Custom Styles -->
+  <style>
+    body {
+      background-color: #f0f2f5;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .service-card {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .service-thumb {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .service-info {
+      padding: 12px;
+    }
+
+    .service-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .service-text {
+      font-size: 14px;
+      color: #777;
+    }
+
+    .ad-space {
+      background-color: #e2e6ea;
+      border: 2px dashed #ced4da;
+      text-align: center;
+      padding: 30px;
+      margin: 20px 0;
+      border-radius: 10px;
+      color: #6c757d;
+      font-weight: bold;
+    }
+
+    .ad-space img {
+      max-width: 100%;
+      max-height: 280px;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    footer a {
+      color: #ffc107;
+      margin: 0 5px;
+    }
+
+    footer a:hover {
+      color: #fff;
+    }
+
+    .section-title {
+      border-bottom: 3px solid #0d6efd;
+      display: inline-block;
+      padding-bottom: 5px;
+      margin-bottom: 20px;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 24px;
+    }
+
+    header h1 {
+      font-weight: bold;
+      font-size: 2.5rem;
+    }
+
+    .social-icons a {
+      margin: 0 10px;
+      color: #0d6efd;
+      font-size: 1.5rem;
+    }
+
+    .social-icons a:hover {
+      color: #ffc107;
+    }
+    @keyframes glassBreak {
+      0% { opacity: 0; transform: scale(0.9) rotateX(90deg); }
+      60% { opacity: 1; transform: scale(1.05) rotateX(-10deg); }
+      100% { transform: scale(1) rotateX(0); }
+    }
+
+    .glass-text {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #0d6efd;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+      animation: glassBreak 1s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="https://yt3.googleusercontent.com/gXAO8ciI65IwFc8DyrnHDoxSx3xpLvNFgXWaCM6NmwOHMO1b0RHobq5l_xs1pnmcO3aaMut5Fw=s160-c-k-c0x00ffffff-no-rj"
+        alt="TMK Logo" style="height: 40px; width: auto; margin-right: 10px;" />
+      TMK MEDIA HUB
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#services">Our Services</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="bg-primary text-white text-center py-5">
+  <div class="container">
+    <h1>Welcome to TMK MEDIA SERVICES</h1>
+    <p class="lead">Your central source for videos, news, blogs & entertainment</p>
+    <p>At TMK Media Hub, we bring events to life—from weddings and burials to corporate functions. With our live streaming and video services, your moments reach the world.</p>
+    <a href="https://www.youtube.com/@tmk8156" target="_blank" class="btn btn-warning mt-3">
+      <i class="fab fa-youtube"></i> Visit Our YouTube Channel
+    </a>
+  </div>
+</header>
+
+<!-- Ad Space -->
+<section class="container my-5">
+  <div class="ad-space text-center">
+    <img id="adImage" src="https://images.unsplash.com/photo-1581291519195-ef11498d1cf5" class="img-fluid" alt="Ad" />
+    <!-- Hidden text to appear after ads -->
+    <h2 id="adText" class="glass-text text-center mt-3" style="display: none;">
+      TMK ELECTRONIC SHOP IN MTITO ADEI
+      CONTACT US (+254707032547)  
+    </h2>
+  </div>
+</section>
+
+<!-- Videos Section -->
+<section class="container my-5" id="videos">
+  <h2 class="section-title">Latest Videos</h2>
+  <div id="loading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  <div class="video-grid" id="videoList"></div>
+</section>
+
+<!-- Services Section -->
+<section class="container my-5" id="services">
+  <h2 class="section-title">Our Services</h2>
+  <div class="service-grid">
+
+    <!-- Burial Services Card -->
+    <div class="service-card border-0" style="background: #ffb87a; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <button class="btn w-100 text-start p-4 border-0 bg-transparent d-flex flex-column align-items-start"
+        type="button" data-bs-toggle="collapse" data-bs-target="#burialCardCollapse" style="min-height:80px;">
+        <span class="mb-2" style="font-size:2.5rem; color:#fff; background:rgba(0,0,0,0.08); border-radius:50%; padding:10px;">
+          <i class="fas fa-cross"></i>
+        </span>
+        <span class="fw-bold" style="font-size:1.3rem; color:#222;">Burial Services</span>
+        <span class="text-dark" style="font-size:1rem;">Comprehensive burial services to honor your loved ones with dignity and care.</span>
+      </button>
+      <div class="collapse" id="burialCardCollapse">
+        <div class="service-info">
+          <div class="accordion" id="burialPackages">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="burialEconomy">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#burialEconomyCollapse">
+                  Economy - 10,000/=
+                </button>
+              </h2>
+              <div id="burialEconomyCollapse" class="accordion-collapse collapse" data-bs-parent="#burialPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 8GB</li>
+                    <li>All photos (soft copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="burialStandard">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#burialStandardCollapse">
+                  Standard Package - 16,000/=
+                </button>
+              </h2>
+              <div id="burialStandardCollapse" class="accordion-collapse collapse" data-bs-parent="#burialPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="burialPremium">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#burialPremiumCollapse">
+                  Premium Package - 25,000/=
+                </button>
+              </h2>
+              <div id="burialPremiumCollapse" class="accordion-collapse collapse" data-bs-parent="#burialPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="burialSilver">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#burialSilverCollapse">
+                  Silver Package - 35,000/=
+                </button>
+              </h2>
+              <div id="burialSilverCollapse" class="accordion-collapse collapse" data-bs-parent="#burialPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="burialGold">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#burialGoldCollapse">
+                  Gold Package - 100,000/=
+                </button>
+              </h2>
+              <div id="burialGoldCollapse" class="accordion-collapse collapse" data-bs-parent="#burialPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                    <li>Screens</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wedding Services Card -->
+    <div class="service-card border-0" style="background: #ffd6e0; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <button class="btn w-100 text-start p-4 border-0 bg-transparent d-flex flex-column align-items-start"
+        type="button" data-bs-toggle="collapse" data-bs-target="#weddingCardCollapse" style="min-height:80px;">
+        <span class="mb-2" style="font-size:2.5rem; color:#fff; background:rgba(0,0,0,0.08); border-radius:50%; padding:10px;">
+          <i class="fas fa-ring"></i>
+        </span>
+        <span class="fw-bold" style="font-size:1.3rem; color:#222;">Wedding Services</span>
+        <span class="text-dark" style="font-size:1rem;">Making your dream wedding come true with our expert planning and execution.</span>
+      </button>
+      <div class="collapse" id="weddingCardCollapse">
+        <div class="service-info">
+          <div class="accordion" id="weddingPackages">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="weddingEconomy">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weddingEconomyCollapse">
+                  Economy - 10,000/=
+                </button>
+              </h2>
+              <div id="weddingEconomyCollapse" class="accordion-collapse collapse" data-bs-parent="#weddingPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 8GB</li>
+                    <li>All photos (soft copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="weddingStandard">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weddingStandardCollapse">
+                  Standard Package - 16,000/=
+                </button>
+              </h2>
+              <div id="weddingStandardCollapse" class="accordion-collapse collapse" data-bs-parent="#weddingPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="weddingPremium">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weddingPremiumCollapse">
+                  Premium Package - 25,000/=
+                </button>
+              </h2>
+              <div id="weddingPremiumCollapse" class="accordion-collapse collapse" data-bs-parent="#weddingPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="weddingSilver">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weddingSilverCollapse">
+                  Silver Package - 35,000/=
+                </button>
+              </h2>
+              <div id="weddingSilverCollapse" class="accordion-collapse collapse" data-bs-parent="#weddingPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="weddingGold">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weddingGoldCollapse">
+                  Gold Package - 100,000/=
+                </button>
+              </h2>
+              <div id="weddingGoldCollapse" class="accordion-collapse collapse" data-bs-parent="#weddingPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                    <li>Screens</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Birthday Services Card -->
+    <div class="service-card border-0" style="background: #ffe9b3; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <button class="btn w-100 text-start p-4 border-0 bg-transparent d-flex flex-column align-items-start"
+        type="button" data-bs-toggle="collapse" data-bs-target="#birthdayCardCollapse" style="min-height:80px;">
+        <span class="mb-2" style="font-size:2.5rem; color:#fff; background:rgba(0,0,0,0.08); border-radius:50%; padding:10px;">
+          <i class="fas fa-birthday-cake"></i>
+        </span>
+        <span class="fw-bold" style="font-size:1.3rem; color:#222;">Birthday Services</span>
+        <span class="text-dark" style="font-size:1rem;">Creative and memorable birthday celebrations for all ages and preferences.</span>
+      </button>
+      <div class="collapse" id="birthdayCardCollapse">
+        <div class="service-info">
+          <div class="accordion" id="birthdayPackages">
+            <!-- Repeat same package structure as above, just change IDs to birthday... -->
+            <!-- Economy -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="birthdayEconomy">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#birthdayEconomyCollapse">
+                  Economy - 10,000/=
+                </button>
+              </h2>
+              <div id="birthdayEconomyCollapse" class="accordion-collapse collapse" data-bs-parent="#birthdayPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 8GB</li>
+                    <li>All photos (soft copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Standard -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="birthdayStandard">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#birthdayStandardCollapse">
+                  Standard Package - 16,000/=
+                </button>
+              </h2>
+              <div id="birthdayStandardCollapse" class="accordion-collapse collapse" data-bs-parent="#birthdayPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Premium -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="birthdayPremium">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#birthdayPremiumCollapse">
+                  Premium Package - 25,000/=
+                </button>
+              </h2>
+              <div id="birthdayPremiumCollapse" class="accordion-collapse collapse" data-bs-parent="#birthdayPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Silver -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="birthdaySilver">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#birthdaySilverCollapse">
+                  Silver Package - 35,000/=
+                </button>
+              </h2>
+              <div id="birthdaySilverCollapse" class="accordion-collapse collapse" data-bs-parent="#birthdayPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Gold -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="birthdayGold">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#birthdayGoldCollapse">
+                  Gold Package - 100,000/=
+                </button>
+              </h2>
+              <div id="birthdayGoldCollapse" class="accordion-collapse collapse" data-bs-parent="#birthdayPackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                    <li>Screens</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corporate Events Card -->
+    <div class="service-card border-0" style="background: #c3e6ff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <button class="btn w-100 text-start p-4 border-0 bg-transparent d-flex flex-column align-items-start"
+        type="button" data-bs-toggle="collapse" data-bs-target="#corporateCardCollapse" style="min-height:80px;">
+        <span class="mb-2" style="font-size:2.5rem; color:#fff; background:rgba(0,0,0,0.08); border-radius:50%; padding:10px;">
+          <i class="fas fa-briefcase"></i>
+        </span>
+        <span class="fw-bold" style="font-size:1.3rem; color:#222;">Corporate Events</span>
+        <span class="text-dark" style="font-size:1rem;">End-to-end corporate event management to showcase your brand's success.</span>
+      </button>
+      <div class="collapse" id="corporateCardCollapse">
+        <div class="service-info">
+          <div class="accordion" id="corporatePackages">
+            <!-- Repeat same package structure as above, just change IDs to corporate... -->
+            <!-- Economy -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="corporateEconomy">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corporateEconomyCollapse">
+                  Economy - 10,000/=
+                </button>
+              </h2>
+              <div id="corporateEconomyCollapse" class="accordion-collapse collapse" data-bs-parent="#corporatePackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 8GB</li>
+                    <li>All photos (soft copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Standard -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="corporateStandard">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corporateStandardCollapse">
+                  Standard Package - 16,000/=
+                </button>
+              </h2>
+              <div id="corporateStandardCollapse" class="accordion-collapse collapse" data-bs-parent="#corporatePackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Premium -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="corporatePremium">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corporatePremiumCollapse">
+                  Premium Package - 25,000/=
+                </button>
+              </h2>
+              <div id="corporatePremiumCollapse" class="accordion-collapse collapse" data-bs-parent="#corporatePackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Silver -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="corporateSilver">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corporateSilverCollapse">
+                  Silver Package - 35,000/=
+                </button>
+              </h2>
+              <div id="corporateSilverCollapse" class="accordion-collapse collapse" data-bs-parent="#corporatePackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Gold -->
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="corporateGold">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#corporateGoldCollapse">
+                  Gold Package - 100,000/=
+                </button>
+              </h2>
+              <div id="corporateGoldCollapse" class="accordion-collapse collapse" data-bs-parent="#corporatePackages">
+                <div class="accordion-body">
+                  <ul>
+                    <li>Flash 15GB</li>
+                    <li>1 album 100 photos (hard copy)</li>
+                    <li>Drone</li>
+                    <li>Video uploaded to YouTube</li>
+                    <li>Live streaming</li>
+                    <li>Reporter</li>
+                    <li>Screens</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Streaming Card -->
+    <div class="service-card border-0" style="background: #d1c4e9; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <button class="btn w-100 text-start p-4 border-0 bg-transparent d-flex flex-column align-items-start"
+        type="button" data-bs-toggle="collapse" data-bs-target="#liveStreamingCardCollapse" style="min-height:80px;">
+        <span class="mb-2" style="font-size:2.5rem; color:#fff; background:rgba(0,0,0,0.08); border-radius:50%; padding:10px;">
+          <i class="fas fa-broadcast-tower"></i>
+        </span>
+        <span class="fw-bold" style="font-size:1.3rem; color:#222;">Live Streaming</span>
+        <span class="text-dark" style="font-size:1rem;">Professional live streaming for events, conferences, and more, reaching a global audience.</span>
+        <span class="fw-bold mt-2" style="font-size:1.1rem; color:#4a148c;">Package: 20,000/=</span>
+      </button>
+      <div class="collapse" id="liveStreamingCardCollapse">
+        <div class="service-info">
+          <ul>
+            <li>Live streaming for your event</li>
+            <li>High-quality video & audio</li>
+            <li>Reach viewers anywhere</li>
+            <li>Includes setup and support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section class="container my-5" id="contact">
+  <h2 class="section-title">Contact Us</h2>
+  <p class="text-center">
+    Email: <a href="mailto:topstarcybercafe.co.uk@gmail.com">topstarcybercafe.co.uk@gmail.com</a>
+  </p>
+  <div class="text-center social-icons">
+    <a href="https://www.youtube.com/@tmk8156" target="_blank"><i class="fab fa-youtube"></i></a>
+    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="mailto:topstarcybercafe.co.uk@gmail.com" target="_blank"><i class="fas fa-envelope"></i></a>
+    <a href="https://www.facebook.com/thomas.kitoti.58" target="_blank"><i class="fab fa-facebook"></i></a>
+    <a href="https://wa.me/254707032547" target="_blank"><i class="fab fa-whatsapp"></i></a>
+  </div>
+</section>
+
+<!-- About Section -->
+<section class="container my-5">
+  <h2 class="section-title">About TMK MEDIA HUB</h2>
+  <p>TMK MEDIA HUB is dedicated to providing high-quality media coverage and event solutions across the region. Whether you're planning a wedding or streaming a live event, our experienced team is here to deliver excellence.</p>
+</section>
+
+<!-- Free Consultation Section -->
+<section class="bg-danger text-white text-center py-5">
+  <div class="container">
+    <h4 class="text-uppercase">Call Us For Your</h4>
+    <h1 class="display-5 fw-bold">FREE CONSULTATION!</h1>
+    <p class="fs-4 mt-3">
+      <i class="fas fa-phone-alt"></i> +254 707 032547
+    </p>
+    <button onclick="copyNumber()" class="btn btn-outline-light btn-lg mt-3">
+      GET STARTED →
+    </button>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-4">
+  <p>&copy; 2025 TMK Media Hub. All rights reserved.</p>
+  <p>
+    <a href="#">Privacy Policy</a> | 
+    <a href="#">Terms of Service</a>
+  </p>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+<script src="/main.js"></script>
+<script>
+  function copyNumber() {
+    const number = "+254707032547";
+    navigator.clipboard.writeText(number).then(() => {
+      alert("Phone number copied: " + number);
+    });
+  }
+</script>
+
+<script>
+  const adImages = [
+    "https://img.kentfaith.com/catalog/blog/160/GW01.0423-1-518x518.jpg",
+    "https://thumbs.dreamstime.com/b/woman-putting-charger-extension-cord-white-floor-closeup-woman-putting-charger-extension-cord-white-floor-closeup-284198243.jpg?w=768",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQURjPgk7b2BNjsh6-R2b927dJ0rHycYqyQpiGRyG34FxyZN13GPvryHuZT_6IjOmNRyeY&usqp=CAU",
+    "https://www.shutterstock.com/image-photo/twisted-headphones-different-colors-on-260nw-199007723.jpg",
+    "https://www.shutterstock.com/image-photo/electrical-outlet-extension-cord-white-260nw-2496929647.jpg",
+    "https://thumbs.dreamstime.com/b/roll-usb-type-type-b-plug-cable-extension-reel-isolated-white-background-roll-usb-cable-extension-isolated-white-328677768.jpg?w=768",
+    "https://thumbs.dreamstime.com/b/camera-battery-charger-isolated-white-background-60091789.jpg?w=992",
+    "https://media.istockphoto.com/id/1156397327/photo/mobile-kit-with-smartphone-headphones-and-chargers.jpg?s=612x612&w=0&k=20&c=t3ohE9UBWLzblm_-IVuMQ1AYXR17NEH9nJJBDu_H67w=",
+    "https://5.imimg.com/data5/SELLER/Default/2022/11/SI/JN/DE/4431417/5v-2a-usb-mobile-charger-500x500.jpg",
+    "https://unixindia.in/cdn/shop/files/head_phone_10194da1-99e4-49b2-8d9b-9c8bacb0e2f7.jpg?v=1738673847&width=2800",
+    "https://thumbs.dreamstime.com/b/power-plug-full-outlet-multiple-socket-overload-charger-extension-cord-cable-connector-215942343.jpg?w=768"
+  ];
+
+  let currentAdIndex = 0;
+  const adImageElement = document.getElementById("adImage");
+  const adTextElement = document.getElementById("adText");
+
+  function rotateAds() {
+    adImageElement.style.display = "block";
+    adTextElement.style.display = "none";
+    currentAdIndex = 0;
+
+    const interval = setInterval(() => {
+      adImageElement.src = adImages[currentAdIndex];
+      currentAdIndex++;
+
+      if (currentAdIndex >= adImages.length) {
+        clearInterval(interval);
+        adImageElement.style.display = "none";
+        adTextElement.style.display = "block";
+
+        // Show name for 5 seconds then restart
+        setTimeout(rotateAds, 5000);
+      }
+    }, 5000); // Change every 5 seconds
+  }
+
+  // Start the rotation
+  rotateAds();
+</script>
+</body>
+</html>
