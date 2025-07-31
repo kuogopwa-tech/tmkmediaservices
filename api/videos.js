@@ -1,4 +1,3 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -7,23 +6,28 @@ export default async function handler(req, res) {
   const channelId = process.env.CHANNEL_ID;
 
   if (!apiKey || !channelId) {
-    return res.status(500).json({ error: 'Missing YOUTUBE_API_KEY or CHANNEL_ID' });
+    return res.status(500).json({ error: "Missing API key or channel ID" });
   }
 
-  try {
-    const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-      params: {
-        key: apiKey,
-        channelId: channelId,
-        part: 'snippet',
-        order: 'date',
-        maxResults: 5
-      }
-    });
+  const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=5`;
 
-    res.status(200).json(response.data.items);
-  } catch (error) {
-    console.error('YouTube API error:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Failed to fetch videos' });
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (!data.items) {
+      return res.status(500).json({ error: "No videos found" });
+    }
+
+    const videos = data.items
+      .filter(item => item.id.kind === "youtube#video")
+      .map(item => ({
+        id: item.id.videoId,
+        title: item.snippet.title
+      }));
+
+    res.status(200).json(videos);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch videos" });
   }
 }
