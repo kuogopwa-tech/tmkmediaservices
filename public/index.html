@@ -181,12 +181,43 @@
 <!-- Videos Section -->
 <section class="container my-5" id="videos">
   <h2 class="section-title">Latest Videos</h2>
-  <div id="loading" class="text-center my-4">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
+  <div class="row">
+    <!-- Videos Left Column -->
+    <div class="col-md-6">
+      <div id="loading" class="text-center my-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <div class="video-list" id="videoList"></div>
+    </div>
+    <!-- Comments & Ratings Right Column -->
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h4 class="card-title">Comments</h4>
+          <div id="commentsSection" style="max-height: 250px; overflow-y: auto;"></div>
+          <form id="commentForm" class="mt-3">
+            <input type="text" id="commentInput" class="form-control mb-2" placeholder="Add a comment..." required />
+            <button type="submit" class="btn btn-primary btn-sm">Post</button>
+          </form>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Rate Us</h4>
+          <div id="ratingSection">
+            <span class="star" data-value="1">&#9733;</span>
+            <span class="star" data-value="2">&#9733;</span>
+            <span class="star" data-value="3">&#9733;</span>
+            <span class="star" data-value="4">&#9733;</span>
+            <span class="star" data-value="5">&#9733;</span>
+            <span id="ratingValue" class="ms-2"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="video-grid" id="videoList"></div>
 </section>
 
 <!-- Services Section -->
@@ -775,6 +806,43 @@
       console.error('Error loading videos:', err);
     }
   });
+</script>
+<script>
+  // Comments
+  const commentsSection = document.getElementById('commentsSection');
+  const commentForm = document.getElementById('commentForm');
+  const commentInput = document.getElementById('commentInput');
+  let comments = JSON.parse(localStorage.getItem('comments') || '[]');
+  function renderComments() {
+    commentsSection.innerHTML = comments.map(c => `<div class="border-bottom py-1">${c}</div>`).join('');
+  }
+  commentForm.addEventListener('submit', e => {
+    e.preventDefault();
+    comments.push(commentInput.value);
+    localStorage.setItem('comments', JSON.stringify(comments));
+    commentInput.value = '';
+    renderComments();
+  });
+  renderComments();
+
+  // Ratings
+  const stars = document.querySelectorAll('#ratingSection .star');
+  const ratingValue = document.getElementById('ratingValue');
+  let rating = localStorage.getItem('rating') || 0;
+  function highlightStars(val) {
+    stars.forEach((star, i) => {
+      star.style.color = i < val ? '#ffc107' : '#ccc';
+    });
+    ratingValue.textContent = val ? `You rated: ${val}/5` : '';
+  }
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      rating = star.dataset.value;
+      localStorage.setItem('rating', rating);
+      highlightStars(rating);
+    });
+  });
+  highlightStars(rating);
 </script>
 </body>
 </html>
