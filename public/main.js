@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch('/api/videos');
+    const res = await fetch('/videos.json');
     const videos = await res.json();
 
     const videoList = document.getElementById('videoList');
@@ -11,13 +11,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `
           <div class="mb-4">
             <iframe 
-              src="https://www.youtube.com/embed/${video.id.videoId || video.id}" 
+              src="https://www.youtube.com/embed/${video.id}" 
               frameborder="0" 
               allowfullscreen 
               class="w-100" 
               style="height:300px;">
             </iframe>
-            <p class="mt-2 fw-bold">${video.snippet ? video.snippet.title : video.title}</p>
+            <p class="mt-2 fw-bold">${video.title}</p>
           </div>
         `;
       }).join('');
