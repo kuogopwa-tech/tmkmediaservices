@@ -33,3 +33,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+async function updateStats() {
+  const res = await fetch('/api/counter');
+  const data = await res.json();
+  document.getElementById('visitorCount').textContent = `Visitors: ${data.visits}`;
+  document.getElementById('likeCount').textContent = data.likes;
+  document.getElementById('avgRating').textContent = data.avgRating;
+  document.getElementById('ratingTotal').textContent = data.ratings;
+}
+updateStats();
+
+document.getElementById('likeBtn').onclick = async () => {
+  await fetch('/api/counter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'like' })
+  });
+  updateStats();
+};
+
+// Example: To send a rating (call this when user rates)
+async function sendRating(value) {
+  await fetch('/api/counter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'rate', value })
+  });
+  updateStats();
+}
+

@@ -149,6 +149,10 @@
         <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="#services">Our Services</a></li>
         <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+        <!-- Upload button (admin) -->
+        <li class="nav-item d-flex align-items-center ms-2">
+          <button id="uploadBtn" class="btn btn-sm btn-outline-light">Upload</button>
+        </li>
       </ul>
     </div>
   </div>
@@ -214,6 +218,13 @@
             <span class="star" data-value="5">&#9733;</span>
             <span id="ratingValue" class="ms-2"></span>
           </div>
+        </div>
+      </div>
+      <!-- TMK Gallery Card -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h4 class="card-title">TMK GALLERY</h4>
+          <div id="gallery" class="d-flex flex-wrap gap-2"></div>
         </div>
       </div>
     </div>
@@ -722,6 +733,9 @@
   </p>
 </footer>
 
+<!-- Hidden file input for gallery uploads -->
+<input type="file" id="galleryUpload" accept="image/*" multiple style="display:none" />
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
@@ -843,6 +857,90 @@
     });
   });
   highlightStars(rating);
+</script>
+<div class="my-3">
+  <span id="visitorCount"></span> |
+  <button id="likeBtn" class="btn btn-sm btn-success">👍 Like</button> <span id="likeCount"></span> |
+  <span>Average Rating: <span id="avgRating"></span> (<span id="ratingTotal"></span> ratings)</span>
+</div>
+<!-- Hidden file input for gallery uploads -->
+<input type="file" id="galleryUpload" accept="image/*" multiple style="display:none" />
+
+<script>
+  // Gallery: load, render, upload -> store in localStorage
+  const galleryKey = 'tmkGalleryImages';
+
+  function loadGallery() {
+    try {
+      return JSON.parse(localStorage.getItem(galleryKey) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function saveGallery(list) {
+    localStorage.setItem(galleryKey, JSON.stringify(list));
+  }
+
+  function renderGallery() {
+    const gallery = document.getElementById('gallery');
+    const images = loadGallery();
+    if (!gallery) return;
+    if (images.length === 0) {
+      gallery.innerHTML = '<p class="text-muted">No images yet.</p>';
+      return;
+    }
+    gallery.innerHTML = images.map((img, i) => `
+      <div class="position-relative" style="width:120px; height:90px;">
+        <img src="${img.data}" alt="${img.name}" class="img-thumbnail" style="width:120px; height:90px; object-fit:cover; cursor:pointer;" data-index="${i}">
+      </div>
+    `).join('');
+    // add click to open full image
+    gallery.querySelectorAll('img[data-index]').forEach(imgEl => {
+      imgEl.onclick = () => {
+        const idx = imgEl.dataset.index;
+        const item = loadGallery()[idx];
+        const w = window.open('', '_blank');
+        w.document.write(`<img src="${item.data}" style="max-width:100%;height:auto">`);
+      };
+    });
+  }
+
+  // Upload flow
+  const uploadBtn = document.getElementById('uploadBtn');
+  const fileInput = document.getElementById('galleryUpload');
+
+  if (uploadBtn && fileInput) {
+    uploadBtn.addEventListener('click', () => {
+      // simple admin gate: prompt for passphrase (change 'admin' to your password) 
+      const pass = prompt('Enter admin password to upload:');
+      if (pass !== 'admin') return alert('Access denied.');
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      const images = loadGallery();
+      for (const f of files) {
+        if (!f.type.startsWith('image/')) continue;
+        const data = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.onerror = rej;
+          r.readAsDataURL(f);
+        });
+        images.unshift({ name: f.name, data, uploadedAt: Date.now() });
+      }
+      saveGallery(images.slice(0, 200)); // limit store size
+      renderGallery();
+      fileInput.value = '';
+      alert('Upload saved (stored locally).');
+    });
+  }
+
+  // Initial render
+  renderGallery();
 </script>
 </body>
 </html>
