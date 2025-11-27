@@ -13,10 +13,8 @@
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-  <!-- Icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-  <!-- Custom Styles -->
   <style>
     body {
       background-color: #f0f2f5;
@@ -129,6 +127,218 @@
       text-shadow: 1px 1px 5px rgba(0,0,0,0.3);
       animation: glassBreak 1s ease-in-out forwards;
     }
+    .modal-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+.modal-box {
+  background: #fff;
+  width: 420px;
+  max-width: 90vw;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+#dropArea {
+  margin-top: 15px;
+  padding: 30px 20px;
+  border: 2px dashed #adb5bd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+#dropArea:hover, #dropArea.dragover {
+  background: #e8f4ff;
+  border-color: #0d6efd;
+  transform: translateY(-2px);
+}
+
+#dropArea.dragover {
+  background: #d1e7ff;
+  border-color: #0a58ca;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+/* Progress bar animation */
+.progress-bar-animated {
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  0% { background-position: 1rem 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Status messages */
+.upload-success {
+  color: #198754;
+  background: #d1e7dd;
+  border: 1px solid #badbcc;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.upload-error {
+  color: #dc3545;
+  background: #f8d7da;
+  border: 1px solid #f5c2c7;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Gallery container */
+#gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;          /* space between images */
+  justify-content: flex-start;
+}
+
+/* Gallery images */
+#gallery img {
+  flex: 1 1 calc(25% - 12px); /* each image takes ~25% width minus gap */
+  height: 150px;               /* fixed height or auto for aspect ratio */
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* Hover effect */
+#gallery img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  #gallery img { flex: 1 1 calc(33.33% - 12px); }
+}
+
+@media (max-width: 768px) {
+  #gallery img { flex: 1 1 calc(50% - 12px); }
+}
+
+@media (max-width: 480px) {
+  #gallery img { flex: 1 1 calc(100% - 12px); }
+}
+
+.heart {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 4px;
+}
+
+.heart:hover {
+    transform: scale(1.2);
+}
+
+.heart:active {
+    transform: scale(0.9);
+}
+
+.heart.processing {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.heart-svg {
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.likes {
+    margin-left: 8px;
+    font-weight: bold;
+    color: white;
+    font-size: 1.1em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+
+/* Gallery item container */
+.gallery-item {
+  position: relative;
+  flex: 1 1 calc(25% - 12px);
+  height: 150px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Image */
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* Hover zoom */
+.gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+/* Overlay */
+.gallery-item .overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.gallery-item .overlay .heart i {
+  color: red;
+  font-size: 16px;
+  cursor: pointer !important;
+  transition: transform 0.2s;
+}
+
+.gallery-item .overlay .heart i:hover {
+  transform: scale(1.2);
+}
+
+/* Likes number */
+.gallery-item .overlay .likes {
+  font-weight: bold;
+}
+
   </style>
 </head>
 <body>
@@ -724,6 +934,164 @@
   </div>
 </section>
 
+
+
+
+<!-- PASSWORD & UPLOAD MODAL -->
+<div id="uploadModal" class="modal-bg">
+  <div class="modal-box">
+    <!-- Password Section -->
+    <div id="passwordSection">
+      <div class="text-center mb-3">
+        <i class="fas fa-lock fa-2x text-primary mb-2"></i>
+        <h5 class="mb-0">Admin Access Required</h5>
+      </div>
+      
+      <div class="mb-3">
+        <label for="adminPass" class="form-label">Enter Admin Password</label>
+        <input type="password" id="adminPass" class="form-control" placeholder="Enter password" autocomplete="off">
+      </div>
+      
+      <!-- Buttons -->
+      <div class="d-flex justify-content-between gap-2 mt-4">
+        <button class="btn btn-outline-secondary btn-sm flex-fill" id="cancelBtn">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
+        <button class="btn btn-primary btn-sm flex-fill" id="confirmPass">
+          <i class="fas fa-lock-open me-1"></i> Continue
+        </button>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div id="uploadSection" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Upload Image</h5>
+        <div>
+          <button class="btn btn-sm btn-outline-secondary me-2" id="changePassBtn" title="Change Password">
+            <i class="fas fa-key me-1"></i> Change Password
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="backToPassword" title="Back to login">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- DROP AREA -->
+      <div id="dropArea" class="border-2 border-dashed rounded p-4 text-center">
+        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-3"></i>
+        <p class="mb-1 fw-medium">Drag & drop your image here</p>
+        <p class="small text-muted mb-3">Supports JPG, PNG, GIF, WebP</p>
+        <button class="btn btn-outline-primary btn-sm" id="browseBtn">
+          <i class="fas fa-folder-open me-1"></i> Browse Files
+        </button>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+      </div>
+
+      <!-- File Info -->
+      <div id="fileInfo" class="mt-3" style="display:none;">
+        <div class="alert alert-light border d-flex justify-content-between align-items-center">
+          <div class="flex-grow-1">
+            <strong id="fileName" class="d-block"></strong>
+            <small class="text-muted" id="fileSize"></small>
+          </div>
+          <button class="btn btn-sm btn-outline-danger ms-2" id="removeFile" title="Remove file">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div id="previewContainer" class="mt-3 text-center" style="display:none;">
+        <p class="small text-muted mb-2">Preview</p>
+        <img id="previewImg" src="" class="img-fluid rounded border" style="max-height: 200px; max-width: 100%; object-fit: contain;"/>
+      </div>
+
+      <!-- Upload Progress -->
+      <div id="uploadProgress" class="mt-3" style="display:none;">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Uploading...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress" style="height: 6px;">
+          <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+               role="progressbar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Upload Status -->
+      <div id="uploadStatus" class="mt-3" style="display:none;"></div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-between gap-2 mt-4">
+        <button class="btn btn-outline-secondary btn-sm flex-fill" id="closeUpload">
+          <i class="fas fa-times me-1"></i> Close
+        </button>
+        <button class="btn btn-success btn-sm flex-fill" id="uploadImage" disabled>
+          <i class="fas fa-upload me-1"></i> Upload Image
+        </button>
+      </div>
+    </div>
+
+    <!-- Change Password Section -->
+    <div id="changePasswordSection" class="modal-section" style="display: none;">
+      <div class="text-center mb-3">
+        <i class="fas fa-key fa-2x text-warning mb-2"></i>
+        <h5 class="mb-0">Change Admin Password</h5>
+      </div>
+      
+      <div class="mb-3">
+        <label for="currentPassword" class="form-label">Current Password</label>
+        <div class="input-group">
+          <input type="password" id="currentPassword" class="form-control" placeholder="Enter current password">
+          <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPass">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="newPassword" class="form-label">New Password</label>
+        <div class="input-group">
+          <input type="password" id="newPassword" class="form-control" placeholder="Enter new password (min 4 characters)">
+          <button class="btn btn-outline-secondary" type="button" id="toggleNewPass">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+        <div class="input-group">
+          <input type="password" id="confirmNewPassword" class="form-control" placeholder="Confirm new password">
+          <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPass">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Upload Status (reused for password change messages) -->
+      <div id="passwordChangeStatus" style="display:none;"></div>
+      
+      <div class="d-flex justify-content-between gap-2 mt-4">
+        <button class="btn btn-outline-secondary btn-sm flex-fill" id="cancelChangePass">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
+        <button class="btn btn-warning btn-sm flex-fill" id="saveNewPassword">
+          <i class="fas fa-save me-1"></i> Save Password
+        </button>
+      </div>
+      
+      <div class="text-center mt-3">
+        <button class="btn btn-sm btn-outline-primary" id="backToUpload">
+          <i class="fas fa-arrow-left me-1"></i> Back to Upload
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Footer -->
 <footer class="bg-dark text-white text-center py-4">
   <p>&copy; 2025 TMK Media Hub. All rights reserved.</p>
@@ -791,73 +1159,7 @@
   // Start the rotation
   rotateAds();
 </script>
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const res = await fetch('/api/videos');
-      const videos = await res.json();
 
-      const videoList = document.getElementById('videoList');
-      if (!Array.isArray(videos) || videos.length === 0) {
-        videoList.innerHTML = '<p>No videos found.</p>';
-      } else {
-        videoList.innerHTML = videos.map(video => `
-          <div class="mb-4">
-            <iframe 
-              src="https://www.youtube.com/embed/${video.id}" 
-              frameborder="0" 
-              allowfullscreen 
-              class="w-100" 
-              style="height:300px;">
-            </iframe>
-            <p class="mt-2 fw-bold">${video.title}</p>
-          </div>
-        `).join('');
-      }
-      document.getElementById('loading').style.display = 'none';
-    } catch (err) {
-      document.getElementById('loading').innerHTML = 'Failed to load videos.';
-      console.error('Error loading videos:', err);
-    }
-  });
-</script>
-<script>
-  // Comments
-  const commentsSection = document.getElementById('commentsSection');
-  const commentForm = document.getElementById('commentForm');
-  const commentInput = document.getElementById('commentInput');
-  let comments = JSON.parse(localStorage.getItem('comments') || '[]');
-  function renderComments() {
-    commentsSection.innerHTML = comments.map(c => `<div class="border-bottom py-1">${c}</div>`).join('');
-  }
-  commentForm.addEventListener('submit', e => {
-    e.preventDefault();
-    comments.push(commentInput.value);
-    localStorage.setItem('comments', JSON.stringify(comments));
-    commentInput.value = '';
-    renderComments();
-  });
-  renderComments();
-
-  // Ratings
-  const stars = document.querySelectorAll('#ratingSection .star');
-  const ratingValue = document.getElementById('ratingValue');
-  let rating = localStorage.getItem('rating') || 0;
-  function highlightStars(val) {
-    stars.forEach((star, i) => {
-      star.style.color = i < val ? '#ffc107' : '#ccc';
-    });
-    ratingValue.textContent = val ? `You rated: ${val}/5` : '';
-  }
-  stars.forEach(star => {
-    star.addEventListener('click', () => {
-      rating = star.dataset.value;
-      localStorage.setItem('rating', rating);
-      highlightStars(rating);
-    });
-  });
-  highlightStars(rating);
-</script>
 <div class="my-3">
   <span id="visitorCount"></span> |
   <button id="likeBtn" class="btn btn-sm btn-success">👍 Like</button> <span id="likeCount"></span> |
@@ -866,81 +1168,43 @@
 <!-- Hidden file input for gallery uploads -->
 <input type="file" id="galleryUpload" accept="image/*" multiple style="display:none" />
 
-<script>
-  // Gallery: load, render, upload -> store in localStorage
-  const galleryKey = 'tmkGalleryImages';
+<!-- PASSWORD & UPLOAD MODAL -->
+<div id="uploadModal" class="modal-bg">
+  <div class="modal-box">
+    <h5>Enter Admin Password</h5>
 
-  function loadGallery() {
-    try {
-      return JSON.parse(localStorage.getItem(galleryKey) || '[]');
-    } catch {
-      return [];
-    }
-  }
+    <input type="password" id="adminPass" class="form-control mt-2" placeholder="Password">
 
-  function saveGallery(list) {
-    localStorage.setItem(galleryKey, JSON.stringify(list));
-  }
+    <!-- Buttons -->
+    <div class="d-flex justify-content-between mt-3">
+      <button class="btn btn-secondary btn-sm" id="cancelBtn">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="confirmPass">Continue</button>
+    </div>
 
-  function renderGallery() {
-    const gallery = document.getElementById('gallery');
-    const images = loadGallery();
-    if (!gallery) return;
-    if (images.length === 0) {
-      gallery.innerHTML = '<p class="text-muted">No images yet.</p>';
-      return;
-    }
-    gallery.innerHTML = images.map((img, i) => `
-      <div class="position-relative" style="width:120px; height:90px;">
-        <img src="${img.data}" alt="${img.name}" class="img-thumbnail" style="width:120px; height:90px; object-fit:cover; cursor:pointer;" data-index="${i}">
+    <!-- Hidden upload section (shows after correct password) -->
+    <div id="uploadSection" style="display:none;">
+      <h6 class="mt-3">Upload Image</h6>
+
+      <!-- DROP AREA -->
+      <div id="dropArea">
+        <p>Drop image here or click to choose</p>
+        <input type="file" id="imageInput" accept="image/*" hidden>
       </div>
-    `).join('');
-    // add click to open full image
-    gallery.querySelectorAll('img[data-index]').forEach(imgEl => {
-      imgEl.onclick = () => {
-        const idx = imgEl.dataset.index;
-        const item = loadGallery()[idx];
-        const w = window.open('', '_blank');
-        w.document.write(`<img src="${item.data}" style="max-width:100%;height:auto">`);
-      };
-    });
-  }
 
-  // Upload flow
-  const uploadBtn = document.getElementById('uploadBtn');
-  const fileInput = document.getElementById('galleryUpload');
+      <!-- Preview -->
+      <img id="previewImg" src="" class="img-fluid mt-3" style="display:none; border-radius:5px;"/>
 
-  if (uploadBtn && fileInput) {
-    uploadBtn.addEventListener('click', () => {
-      // simple admin gate: prompt for passphrase (change 'admin' to your password) 
-      const pass = prompt('Enter admin password to upload:');
-      if (pass !== 'admin') return alert('Access denied.');
-      fileInput.click();
-    });
+      <!-- Upload buttons -->
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-secondary btn-sm" id="closeUpload">Close</button>
+        <button class="btn btn-success btn-sm" id="uploadImage">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    fileInput.addEventListener('change', async (e) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length === 0) return;
-      const images = loadGallery();
-      for (const f of files) {
-        if (!f.type.startsWith('image/')) continue;
-        const data = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = () => res(r.result);
-          r.onerror = rej;
-          r.readAsDataURL(f);
-        });
-        images.unshift({ name: f.name, data, uploadedAt: Date.now() });
-      }
-      saveGallery(images.slice(0, 200)); // limit store size
-      renderGallery();
-      fileInput.value = '';
-      alert('Upload saved (stored locally).');
-    });
-  }
 
-  // Initial render
-  renderGallery();
-</script>
+
 </body>
+<script src="main.js" defer></script>
 </html>
