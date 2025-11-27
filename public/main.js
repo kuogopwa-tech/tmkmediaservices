@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ==================== GALLERY MANAGEMENT ====================
 const Gallery = {
     currentImages: [], // Store current gallery images for navigation
-
+    
     async load() {
         const gallery = document.getElementById('gallery');
         if (!gallery) return console.error('❌ Gallery element not found in DOM');
@@ -187,11 +187,11 @@ const Gallery = {
             gallery.innerHTML = images.map((img, index) => {
                 return `
                 <div class="gallery-item">
-                    <img src="${img.url}" alt="${img.id}" data-index="${index}" 
-                         data-filename="${img.id}" data-likes="${img.likes || 0}" />
+                    <img src="${img.url}" alt="${img.name}" data-index="${index}" 
+                         data-filename="${img.name}" data-likes="${img.likes || 0}" />
                     <div class="overlay">
                         <span class="heart" role="button" tabindex="0" aria-label="Like image" 
-                              data-filename="${img.id}">
+                              data-filename="${img.name}">
                             ${this.getHeartSVG()}
                         </span>
                         <span class="likes">${img.likes || 0}</span>
@@ -209,6 +209,7 @@ const Gallery = {
     },
 
     getHeartSVG() {
+        // Always return filled heart (red)
         return `
             <svg width="24" height="24" viewBox="0 0 24 24" fill="#ff4757" stroke="#ff4757" 
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-svg">
@@ -223,7 +224,7 @@ const Gallery = {
 
         console.log('🔄 Setting up like handler...');
         gallery.addEventListener('click', debounce(async (e) => {
-            // Open image in viewer
+            // Handle image clicks for viewer
             if (e.target.tagName === 'IMG' && e.target.closest('.gallery-item')) {
                 const img = e.target;
                 const filename = img.dataset.filename;
@@ -233,7 +234,7 @@ const Gallery = {
                 return;
             }
 
-            // Handle heart clicks
+            // Handle heart clicks for likes
             const heartEl = e.target.closest('.heart');
             if (!heartEl) return;
 
@@ -253,46 +254,68 @@ const Gallery = {
     },
 
     async handleLike(heartEl) {
-        const likesEl = heartEl.nextElementSibling;
-        if (!likesEl) return console.error('❌ Likes element not found');
-
-        const filename = heartEl.dataset.filename;
-        let likesCount = parseInt(likesEl.textContent) || 0;
-
-        // Prevent rapid double clicks
-        if (heartEl.classList.contains('processing')) return;
-        heartEl.classList.add('processing');
-
-        // Optimistic UI update
-        likesCount += 1;
-        likesEl.textContent = likesCount;
-
-        try {
-            const res = await fetch('/api/gallery/like', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename })
-            });
-
-            if (!res.ok) throw new Error(`Server returned ${res.status}`);
-
-            const result = await res.json();
-            if (result.success) {
-                likesEl.textContent = result.likes;
-                const imgEl = heartEl.closest('.gallery-item').querySelector('img');
-                imgEl.dataset.likes = result.likes;
-            } else {
-                likesEl.textContent = likesCount - 1; // revert
-            }
-        } catch (err) {
-            console.error('❌ Failed to send like:', err);
-            likesEl.textContent = likesCount - 1; // revert
-        } finally {
-            heartEl.classList.remove('processing');
-        }
+    const likesEl = heartEl.nextElementSibling;
+    if (!likesEl) {
+        console.error('❌ Likes element not found');
+        return;
     }
-};
 
+    const filename = heartEl.dataset.filename;
+    let likesCount = parseInt(likesEl.textContent) || 0;
+
+    console.log(`🔄 Adding like for ${filename}, current likes: ${likesCount}`);
+
+    // Prevent rapid double clicks
+    if (heartEl.classList.contains('processing')) {
+        console.log('⏳ Already processing like, skipping...');
+        return;
+    }
+
+    heartEl.classList.add('processing');
+
+    // Update likes count - always add 1
+    likesCount += 1;
+    likesEl.textContent = likesCount;
+
+    console.log(`👍 New likes count: ${likesCount}`);
+
+    // Send to server
+    try {
+        console.log('📡 Sending like to server for filename:', filename);
+        
+        const res = await fetch('/api/gallery/like', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                filename
+            })
+        });
+        
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        
+        const result = await res.json();
+        console.log('✅ Server response:', result);
+        
+        if (result.success) {
+            // Update with server count to ensure consistency
+            likesEl.textContent = result.likes;
+            console.log(`🔄 Updated likes count from server: ${result.likes}`);
+            
+            // Also update the data attribute for consistency
+            const galleryItem = heartEl.closest('.gallery-item');
+            const imgEl = galleryItem.querySelector('img');
+            imgEl.dataset.likes = result.likes;
+        }
+    } catch (err) {
+        // Revert optimistic update on error
+        console.error('❌ Failed to send like:', err);
+        likesEl.textContent = likesCount - 1;
+        console.log('🔄 Reverted like due to error');
+    } finally {
+        heartEl.classList.remove('processing');
+    }
+}
+};
   // ==================== STATS COUNTER ====================
   const Stats = {
     async update() {
