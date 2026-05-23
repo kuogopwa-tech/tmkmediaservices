@@ -142,9 +142,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               allowfullscreen 
               class="w-100" 
               style="height:300px;"
-              title="${video.title}">
+              title="${video.title ?? video.snippet?.title ?? ''}">
             </iframe>
-            <p class="mt-2 fw-bold">${video.title}</p>
+            <p class="mt-2 fw-bold">${video.title ?? video.snippet?.title ?? ''}</p>
           </div>
         `).join('');
       }
