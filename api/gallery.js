@@ -1,5 +1,5 @@
 // pages/api/gallery.js
-import cloudinary from '../../lib/cloudinary';
+import cloudinary from '../lib/cloudinary';
 
 export default async function handler(req, res) {
     try {
