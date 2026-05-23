@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const Gallery = {
     currentImages: [], // Store current gallery images for navigation
 
+
     async load() {
         const gallery = document.getElementById('gallery');
         if (!gallery) return console.error('❌ Gallery element not found in DOM');
