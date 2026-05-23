@@ -186,13 +186,14 @@ const Gallery = {
 
             console.log(`🎨 Rendering ${images.length} gallery items...`);
             gallery.innerHTML = images.map((img, index) => {
+                const fileKey = img.id ?? img.name; // API returns {name,url,likes}; older code used {id,url,likes}
                 return `
                 <div class="gallery-item">
-                    <img src="${img.url}" alt="${img.id}" data-index="${index}" 
-                         data-filename="${img.id}" data-likes="${img.likes || 0}" />
+                    <img src="${img.url}" alt="${fileKey || ''}" data-index="${index}" 
+                         data-filename="${fileKey}" data-likes="${img.likes || 0}" />
                     <div class="overlay">
                         <span class="heart" role="button" tabindex="0" aria-label="Like image" 
-                              data-filename="${img.id}">
+                              data-filename="${fileKey}">
                             ${this.getHeartSVG()}
                         </span>
                         <span class="likes">${img.likes || 0}</span>
