@@ -5,6 +5,10 @@ const multer = require('multer');
 const fs = require('fs');
 require('dotenv').config();
 
+const { connectAndInit } = require('./lib/dbInit');
+const { ImageLike, Counter, Admin } = require('./lib/models');
+
+
 const app = express();
 const PORT = 3000;
 
@@ -46,56 +50,74 @@ const upload = multer({
     }
 });
 
-// Serve uploaded files statically
+// Serve uploaded files statically (legacy; Cloudinary will be primary)
 app.use('/uploads', express.static(uploadsDir));
 
-// File persistence for likes
-const likesFile = path.join(__dirname, 'image-likes.json');
 
-// Load likes from file
-function loadImageLikes() {
-    try {
-        if (fs.existsSync(likesFile)) {
-            const data = fs.readFileSync(likesFile, 'utf8');
-            return JSON.parse(data) || {};
-        }
-    } catch (error) {
-        console.error('Error loading image likes:', error);
-    }
-    return {};
-}
-
-// Save likes to file
-function saveImageLikes(likes) {
-    try {
-        const data = JSON.stringify(likes, null, 2);
-        fs.writeFileSync(likesFile, data, 'utf8');
-        return true;
-    } catch (error) {
-        console.error('Error saving image likes:', error);
-        return false;
-    }
-}
-
-// Initialize imageLikes from file (REMOVED DUPLICATE DECLARATION)
-let imageLikes = loadImageLikes();
+// MongoDB persistence replaces file-based + in-memory counters
 let visitorCount = 0;
 let totalLikes = 0;
 let ratings = [];
 let ratingSum = 0;
+
+async function refreshCounterCache() {
+    const doc = await Counter.findById('main').lean();
+    if (doc) {
+        visitorCount = doc.visits || 0;
+        totalLikes = doc.totalLikes || 0;
+        ratings = doc.ratings || [];
+        ratingSum = doc.ratingSum || 0;
+    }
+}
+
+// Connect DB before handling requests
+connectAndInit()
+    .then(async () => {
+        await refreshCounterCache();
+
+        app.listen(PORT, () => {
+
+
+            console.log(`🚀 Server is running on http://localhost:${PORT}`);
+            console.log(`📁 Uploads directory: ${uploadsDir}`);
+            console.log(`🔍 Test route: http://localhost:${PORT}/test`);
+            console.log(`📤 Upload route: http://localhost:${PORT}/upload`);
+            console.log('\n📋 Available API endpoints:');
+            console.log('   GET  /api/videos');
+            console.log('   GET  /api/gallery');
+            console.log('   POST /api/gallery/like');
+            console.log('   GET  /api/counter');
+            console.log('   POST /api/counter');
+            console.log('   POST /api/auth');
+            console.log('   POST /upload');
+        });
+    })
+    .catch(err => {
+        console.error('❌ MongoDB initialization failed:', err);
+        process.exit(1);
+    });
+
+
 
 // TEST ROUTE
 app.get('/test', (req, res) => {
     res.json({ message: 'Server is working!', timestamp: new Date().toISOString() });
 });
 
-// COUNTER API - FIXED
-app.get('/api/counter', (req, res) => {
+// COUNTER API (MongoDB-backed)
+app.get('/api/counter', async (req, res) => {
     try {
-        visitorCount++;
-        
+        // increment visits in DB, then return cached values
+        await Counter.findByIdAndUpdate(
+            'main',
+            { $inc: { visits: 1 } },
+            { upsert: true, new: true }
+        );
+
+        await refreshCounterCache();
+
         const avgRating = ratings.length > 0 ? (ratingSum / ratings.length).toFixed(1) : 0;
-        
+
         res.json({
             visits: visitorCount,
             likes: totalLikes,
@@ -114,19 +136,31 @@ app.get('/api/counter', (req, res) => {
     }
 });
 
-app.post('/api/counter', (req, res) => {
+app.post('/api/counter', async (req, res) => {
     try {
         const { action, value } = req.body;
-        
+
         if (action === 'like') {
-            totalLikes++;
+            await Counter.findByIdAndUpdate(
+                'main',
+                { $inc: { totalLikes: 1 } },
+                { upsert: true, new: true }
+            );
         } else if (action === 'rate' && value) {
-            ratings.push(Number(value));
-            ratingSum += Number(value);
+            const num = Number(value);
+            if (!Number.isNaN(num)) {
+                await Counter.findByIdAndUpdate(
+                    'main',
+                    { $push: { ratings: num }, $inc: { ratingSum: num } },
+                    { upsert: true, new: true }
+                );
+            }
         }
-        
+
+        await refreshCounterCache();
+
         const avgRating = ratings.length > 0 ? (ratingSum / ratings.length).toFixed(1) : 0;
-        
+
         res.json({
             success: true,
             visits: visitorCount,
@@ -140,31 +174,53 @@ app.post('/api/counter', (req, res) => {
     }
 });
 
-// GALLERY API
-app.get('/api/gallery', (req, res) => {
-    fs.readdir(uploadsDir, (err, files) => {
-        if (err) {
-            return res.status(500).json({ success: false, message: 'Failed to read uploads folder' });
-        }
 
-        const imageFiles = files.filter(file => {
-            const ext = path.extname(file).toLowerCase();
-            return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
-        });
+// GALLERY API (Cloudinary images + MongoDB likes)
+app.get('/api/gallery', async (req, res) => {
+    try {
+        const cloudinary = require('./lib/cloudinary').default || require('./lib/cloudinary');
 
-        const images = imageFiles.map(file => ({
-            name: file,
-            url: `/uploads/${file}`,
-            likes: imageLikes[file] || 0
+        const result = await cloudinary.search
+            .expression('folder:tmk_gallery')
+            .sort_by('created_at', 'desc')
+            .max_results(100)
+            .execute();
+
+        const images = (result.resources || []).map(img => ({
+            name: img.public_id, // used as identifier for likes in MongoDB
+            url: cloudinary.url(img.public_id, {
+                width: 300,
+                height: 300,
+                crop: 'fill',
+                gravity: 'auto',
+                fetch_format: 'auto',
+                quality: 'auto',
+            }),
+            likes: 0
         }));
 
-        console.log('📸 Sending gallery data:', images.length, 'images');
+        const ids = images.map(i => i.name);
+        const docs = await ImageLike.find({ filename: { $in: ids } }).lean();
+        const likeMap = new Map(docs.map(d => [d.filename, d.likes || 0]));
+
+        for (const img of images) {
+            img.likes = likeMap.get(img.name) || 0;
+        }
+
+        console.log('📸 Sending Cloudinary gallery data:', images.length, 'images');
         res.json(images);
-    });
+    } catch (err) {
+        console.error('Gallery fetch error:', err);
+        res.status(500).json({ success: false, message: 'Failed to fetch gallery' });
+    }
 });
 
-// LIKE API - WITH FILE PERSISTENCE
-app.post('/api/gallery/like', (req, res) => {
+
+
+
+
+// LIKE API (MongoDB)
+app.post('/api/gallery/like', async (req, res) => {
     try {
         const { filename } = req.body;
 
@@ -175,20 +231,17 @@ app.post('/api/gallery/like', (req, res) => {
             });
         }
 
-        // Initialize if doesn't exist, then increment
-        if (!imageLikes[filename]) {
-            imageLikes[filename] = 0;
-        }
-        imageLikes[filename] += 1;
+        const updated = await ImageLike.findOneAndUpdate(
+            { filename },
+            { $inc: { likes: 1 } },
+            { upsert: true, new: true }
+        );
 
-        // Save to file
-        saveImageLikes(imageLikes);
-
-        console.log(`❤️ Like recorded for ${filename}: ${imageLikes[filename]} likes`);
+        console.log(`❤️ Like recorded for ${filename}: ${updated?.likes || 0} likes`);
 
         res.json({ 
             success: true, 
-            likes: imageLikes[filename],
+            likes: updated?.likes || 0,
             filename: filename
         });
     } catch (error) {
@@ -200,48 +253,24 @@ app.post('/api/gallery/like', (req, res) => {
     }
 });
 
-// Password file path
-const passwordFile = path.join(__dirname, 'admin-password.json');
 
-// Function to load password from file
-function loadAdminPassword() {
-    try {
-        if (fs.existsSync(passwordFile)) {
-            const data = fs.readFileSync(passwordFile, 'utf8');
-            const parsed = JSON.parse(data);
-            return parsed.password || "tmk@2025"; // Default fallback
-        }
-    } catch (error) {
-        console.error('Error loading admin password:', error);
-    }
-    return "tmk@2025"; // Default password
+// --- Admin auth via MongoDB ---
+let adminPassword = null;
+
+async function refreshAdminPasswordCache() {
+    const doc = await Admin.findById('main').lean();
+    adminPassword = doc?.password || 'tmk@2025';
 }
 
-// Function to save password to file
-function saveAdminPassword(newPassword) {
-    try {
-        const data = JSON.stringify({ password: newPassword, updated: new Date().toISOString() });
-        fs.writeFileSync(passwordFile, data, 'utf8');
-        console.log('✅ Admin password saved to file');
-        return true;
-    } catch (error) {
-        console.error('Error saving admin password:', error);
-        return false;
-    }
-}
-
-// Initialize admin password
-let adminPassword = loadAdminPassword();
-console.log('🔐 Admin password loaded:', adminPassword ? 'Set' : 'Using default');
-
-// Updated authentication routes
-app.post('/api/auth', (req, res) => {
+app.post('/api/auth', async (req, res) => {
     try {
         const { password } = req.body;
-        
+
         if (!password) {
             return res.json({ authenticated: false, message: 'Password required' });
         }
+
+        await refreshAdminPasswordCache();
 
         if (password === adminPassword) {
             res.json({ authenticated: true });
@@ -254,16 +283,16 @@ app.post('/api/auth', (req, res) => {
     }
 });
 
-// Updated change password route
-app.post('/api/auth/change-password', (req, res) => {
+app.post('/api/auth/change-password', async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        
+
         if (!currentPassword || !newPassword) {
             return res.json({ success: false, message: 'Both current and new password are required' });
         }
 
-        // Verify current password
+        await refreshAdminPasswordCache();
+
         if (currentPassword !== adminPassword) {
             return res.json({ success: false, message: 'Current password is incorrect' });
         }
@@ -272,24 +301,16 @@ app.post('/api/auth/change-password', (req, res) => {
             return res.json({ success: false, message: 'New password must be at least 4 characters' });
         }
 
-        // Update password in memory
-        adminPassword = newPassword;
-        
-        // Save to file for persistence
-        const saved = saveAdminPassword(newPassword);
-        
-        if (saved) {
-            console.log('🔐 Admin password changed successfully');
-            res.json({ success: true, message: 'Password changed successfully' });
-        } else {
-            res.json({ success: false, message: 'Password changed but failed to save permanently' });
-        }
-        
+        await Admin.findByIdAndUpdate('main', { password: newPassword }, { upsert: true, new: true });
+
+        console.log('✅ Admin password changed successfully');
+        res.json({ success: true, message: 'Password changed successfully' });
     } catch (error) {
         console.error('Change password error:', error);
         res.status(500).json({ success: false, message: 'Failed to change password' });
     }
 });
+
 
 // UPLOAD ROUTE
 app.post('/upload', upload.single('image'), (req, res) => {
