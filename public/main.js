@@ -508,8 +508,8 @@ const UploadModal = {
 
     open() {
         this.elements.uploadModal.style.display = "flex";
-        this.elements.adminPass.focus();
         this.reset();
+        this.elements.adminPass.focus();
     },
 
     close() {
@@ -794,6 +794,105 @@ const UploadModal = {
         xhr.send(formData);
     }
 };
+
+// ==================== AI CHAT WIDGET ====================
+const ChatWidget = {
+  elements: {},
+  messages: [],
+  open: false,
+
+  init() {
+    this.elements = {
+      fab: document.getElementById('chatFab'),
+      panel: document.getElementById('chatPanel'),
+      close: document.getElementById('chatClose'),
+      log: document.getElementById('chatLog'),
+      input: document.getElementById('chatInput'),
+      send: document.getElementById('chatSend'),
+    };
+
+    // If chat UI isn't present, do nothing.
+    if (!this.elements.fab || !this.elements.panel) return;
+
+    this.elements.fab.onclick = () => this.toggle(true);
+    if (this.elements.close) this.elements.close.onclick = () => this.toggle(false);
+
+    if (this.elements.send) this.elements.send.onclick = () => this.send();
+
+    if (this.elements.input) {
+      this.elements.input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.send();
+        }
+      });
+    }
+
+    this.pushAssistant("Hi. Ask me anything about TMK Media Services.");
+  },
+
+  toggle(open) {
+    this.open = open;
+    this.elements.panel.style.display = open ? 'flex' : 'none';
+    if (open && this.elements.input) this.elements.input.focus();
+  },
+
+  render() {
+    if (!this.elements.log) return;
+    this.elements.log.innerHTML = this.messages.map(m => {
+      const cls = m.role === 'user' ? 'user' : 'assistant';
+      const safe = (m.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<div class="chat-msg ${cls}">${safe}</div>`;
+    }).join('');
+
+    this.elements.log.scrollTop = this.elements.log.scrollHeight;
+  },
+
+  pushUser(text) {
+    this.messages.push({ role: 'user', content: text });
+    this.render();
+  },
+
+  pushAssistant(text) {
+    this.messages.push({ role: 'assistant', content: text });
+    this.render();
+  },
+
+  async send() {
+    if (!this.elements.input) return;
+    const text = this.elements.input.value.trim();
+    if (!text) return;
+
+    this.elements.input.value = '';
+    this.pushUser(text);
+
+    // Keep context bounded
+    const context = this.messages.slice(-12);
+
+    try {
+      this.pushAssistant('...');
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: context }),
+      });
+
+      const data = await res.json();
+      this.messages.pop(); // remove "..."
+
+      if (!res.ok || !data?.ok) {
+        this.pushAssistant(data?.error || `Chat failed (HTTP ${res.status})`);
+        return;
+      }
+
+      this.pushAssistant(data.content || '');
+    } catch (err) {
+      this.messages.pop(); // remove "..."
+      this.pushAssistant('Chat error. Check AI env config and try again.');
+      console.error('Chat error:', err);
+    }
+  }
+};
   // ==================== INITIALIZATION ====================
   async function initialize() {
     // Initialize image viewer first
@@ -807,6 +906,7 @@ const UploadModal = {
     // Setup event handlers
     Gallery.setupLikeHandler();
     UploadModal.init();
+    ChatWidget.init();
 
     // Bind global event handlers
     const likeBtn = document.getElementById('likeBtn');

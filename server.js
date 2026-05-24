@@ -33,6 +33,7 @@ mountApiFunction('/api/gallery-like', './api/gallery-like');
 mountApiFunction('/api/gallery/like', './api/gallery/like');
 mountApiFunction('/api/upload', './api/upload');
 mountApiFunction('/api/videos', './api/videos');
+mountApiFunction('/api/chat', './api/chat');
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
