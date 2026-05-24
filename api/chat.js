@@ -9,6 +9,17 @@ async function openAiCompatibleChat({ baseUrl, apiKey, model, messages }) {
   const headers = { 'Content-Type': 'application/json' };
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
+  // OpenRouter recommends these headers. They help with attribution and can avoid some policy blocks.
+  if (normalizeBaseUrl(baseUrl).includes('openrouter.ai')) {
+    const siteUrl =
+      process.env.APP_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+      '';
+    const appName = process.env.APP_NAME || 'tmkmediaservices';
+    if (siteUrl) headers['HTTP-Referer'] = siteUrl;
+    headers['X-Title'] = appName;
+  }
+
   const resp = await fetch(url, {
     method: 'POST',
     headers,
@@ -64,29 +75,20 @@ module.exports = async function handler(req, res) {
   try {
     const provider = (process.env.AI_PROVIDER || '').toLowerCase();
 
-    // Option A: OpenAI-compatible local servers (LM Studio, vLLM, Ollama OpenAI compat, etc.)
+    // OpenAI-compatible endpoint (OpenRouter, etc.)
     const aiBaseUrl = process.env.AI_BASE_URL;
-    if (provider === 'openai_compat' || (aiBaseUrl && provider !== 'ollama')) {
+    if (provider === 'openai_compat' || aiBaseUrl) {
       const model = process.env.AI_MODEL || 'gpt-3.5-turbo';
       const apiKey = process.env.AI_API_KEY || '';
       const out = await openAiCompatibleChat({ baseUrl: aiBaseUrl, apiKey, model, messages });
       return res.status(200).json({ ok: true, content: out.content });
     }
 
-    // Option B: Ollama native API
-    const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
-    const ollamaModel = process.env.OLLAMA_MODEL || 'llama3';
-    if (provider === 'ollama' || ollamaBaseUrl) {
-      const out = await ollamaChat({ baseUrl: ollamaBaseUrl, model: ollamaModel, messages });
-      return res.status(200).json({ ok: true, content: out.content });
-    }
-
     res.status(500).json({
       ok: false,
-      error: 'No AI provider configured. Set AI_PROVIDER + AI_BASE_URL/AI_MODEL (OpenAI-compatible) or OLLAMA_BASE_URL/OLLAMA_MODEL.',
+      error: 'No AI provider configured. Set AI_PROVIDER=openai_compat and AI_BASE_URL/AI_MODEL/AI_API_KEY.',
     });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message || 'Chat failed' });
   }
 };
-
