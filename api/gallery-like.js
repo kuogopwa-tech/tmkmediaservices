@@ -1,5 +1,6 @@
 const { connectMongo } = require('../lib/mongo');
 const { ImageLike } = require('../lib/models');
+const { getVisitorKey } = require('../lib/visitorKey');
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -16,11 +17,29 @@ module.exports = async function handler(req, res) {
   }
 
   await connectMongo();
-  const updated = await ImageLike.findOneAndUpdate(
+  const visitorKey = getVisitorKey(req);
+
+  await ImageLike.updateOne(
     { filename: imageKey },
-    { $inc: { likes: 1 } },
-    { upsert: true, new: true }
+    { $setOnInsert: { filename: imageKey, likes: 0, likedBy: [] } },
+    { upsert: true }
   );
 
-  res.status(200).json({ success: true, likes: updated.likes });
+  const updated = await ImageLike.findOneAndUpdate(
+    { filename: imageKey, likedBy: { $ne: visitorKey } },
+    { $inc: { likes: 1 }, $addToSet: { likedBy: visitorKey } },
+    { new: true }
+  );
+
+  if (updated) {
+    return res.status(200).json({ success: true, liked: true, likes: updated.likes });
+  }
+
+  const existing = await ImageLike.findOne({ filename: imageKey }).lean();
+  res.status(200).json({
+    success: true,
+    liked: false,
+    alreadyLiked: true,
+    likes: existing?.likes || 0,
+  });
 };

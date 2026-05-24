@@ -160,6 +160,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ==================== GALLERY MANAGEMENT ====================
 const Gallery = {
     currentImages: [], // Store current gallery images for navigation
+    likedStorageKey: 'tmkGalleryLikedImages',
+
+    getLikedImages() {
+        try {
+            return new Set(JSON.parse(localStorage.getItem(this.likedStorageKey) || '[]'));
+        } catch (err) {
+            return new Set();
+        }
+    },
+
+    hasLiked(filename) {
+        return this.getLikedImages().has(filename);
+    },
+
+    rememberLiked(filename) {
+        const liked = this.getLikedImages();
+        liked.add(filename);
+        localStorage.setItem(this.likedStorageKey, JSON.stringify([...liked]));
+    },
 
 
     async load() {
@@ -187,12 +206,15 @@ const Gallery = {
             console.log(`🎨 Rendering ${images.length} gallery items...`);
             gallery.innerHTML = images.map((img, index) => {
                 const fileKey = img.id ?? img.name; // API returns {name,url,likes}; older code used {id,url,likes}
+                const alreadyLiked = this.hasLiked(fileKey);
                 return `
                 <div class="gallery-item">
                     <img src="${img.url}" alt="${fileKey || ''}" data-index="${index}" 
                          data-filename="${fileKey}" data-likes="${img.likes || 0}" />
                     <div class="overlay">
-                        <span class="heart" role="button" tabindex="0" aria-label="Like image" 
+                        <span class="heart${alreadyLiked ? ' liked' : ''}" role="button" tabindex="0"
+                              aria-label="${alreadyLiked ? 'Already liked' : 'Like image'}"
+                              title="${alreadyLiked ? 'Already liked' : 'Like image'}"
                               data-filename="${fileKey}">
                             ${this.getHeartSVG()}
                         </span>
@@ -263,6 +285,13 @@ const Gallery = {
 
         // Prevent rapid double clicks
         if (heartEl.classList.contains('processing')) return;
+        if (this.hasLiked(filename)) {
+            heartEl.classList.add('liked');
+            heartEl.setAttribute('aria-label', 'Already liked');
+            heartEl.setAttribute('title', 'Already liked');
+            return;
+        }
+
         heartEl.classList.add('processing');
 
         // Optimistic UI update
@@ -283,6 +312,10 @@ const Gallery = {
                 likesEl.textContent = result.likes;
                 const imgEl = heartEl.closest('.gallery-item').querySelector('img');
                 imgEl.dataset.likes = result.likes;
+                heartEl.classList.add('liked');
+                heartEl.setAttribute('aria-label', 'Already liked');
+                heartEl.setAttribute('title', 'Already liked');
+                this.rememberLiked(filename);
             } else {
                 likesEl.textContent = likesCount - 1; // revert
             }
@@ -405,8 +438,11 @@ const UploadModal = {
 
         // Password handling
         elements.confirmPass.onclick = () => this.authenticate();
-        elements.adminPass.addEventListener('keypress', e => {
-            if (e.key === 'Enter') this.authenticate();
+        elements.adminPass.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.authenticate();
+            }
         });
 
         // Password change handling
@@ -578,7 +614,7 @@ const UploadModal = {
                 this.elements.saveNewPassword.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
             }
 
-            const res = await fetch('/api/auth/change-password', {
+            const res = await fetch('/api/change-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ currentPassword, newPassword })
@@ -754,7 +790,7 @@ const UploadModal = {
             this.elements.uploadImage.disabled = false;
         });
 
-        xhr.open("POST", "/upload");
+        xhr.open("POST", "/api/upload");
         xhr.send(formData);
     }
 };
@@ -773,7 +809,10 @@ const UploadModal = {
     UploadModal.init();
 
     // Bind global event handlers
-    document.getElementById('likeBtn').onclick = () => Stats.like();
+    const likeBtn = document.getElementById('likeBtn');
+    if (likeBtn) {
+      likeBtn.onclick = () => Stats.like();
+    }
     window.sendRating = (value) => Stats.rate(value);
   }
 

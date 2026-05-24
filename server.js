@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const { connectAndInit } = require('./lib/dbInit');
 const { ImageLike, Counter, Admin } = require('./lib/models');
+const { getVisitorKey } = require('./lib/visitorKey');
 
 
 const app = express();
@@ -231,16 +232,36 @@ app.post('/api/gallery/like', async (req, res) => {
             });
         }
 
-        const updated = await ImageLike.findOneAndUpdate(
+        const visitorKey = getVisitorKey(req);
+
+        await ImageLike.updateOne(
             { filename },
-            { $inc: { likes: 1 } },
-            { upsert: true, new: true }
+            { $setOnInsert: { filename, likes: 0, likedBy: [] } },
+            { upsert: true }
         );
+
+        const updated = await ImageLike.findOneAndUpdate(
+            { filename, likedBy: { $ne: visitorKey } },
+            { $inc: { likes: 1 }, $addToSet: { likedBy: visitorKey } },
+            { new: true }
+        );
+
+        if (!updated) {
+            const existing = await ImageLike.findOne({ filename }).lean();
+            return res.json({
+                success: true,
+                liked: false,
+                alreadyLiked: true,
+                likes: existing?.likes || 0,
+                filename: filename
+            });
+        }
 
         console.log(`❤️ Like recorded for ${filename}: ${updated?.likes || 0} likes`);
 
         res.json({ 
             success: true, 
+            liked: true,
             likes: updated?.likes || 0,
             filename: filename
         });
@@ -492,4 +513,35 @@ app.use((error, req, res, next) => {
 // Catch-all route for GET requests ONLY - MUST BE LAST
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.post('/api/upload', upload.single('image'), (req, res) => {
+    console.log('API upload endpoint hit!');
+    console.log('File received:', req.file);
+
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file uploaded'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'File uploaded successfully',
+            file: {
+                filename: req.file.filename,
+                originalName: req.file.originalname,
+                size: req.file.size,
+                path: `/uploads/${req.file.filename}`
+            }
+        });
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Upload failed: ' + error.message
+        });
+    }
 });

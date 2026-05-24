@@ -272,6 +272,11 @@
     opacity: 0.7;
 }
 
+.heart.liked {
+    pointer-events: none;
+    opacity: 0.75;
+}
+
 .heart-svg {
     transition: all 0.3s ease;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
@@ -1160,51 +1165,5 @@
   rotateAds();
 </script>
 
-<div class="my-3">
-  <span id="visitorCount"></span> |
-  <button id="likeBtn" class="btn btn-sm btn-success">👍 Like</button> <span id="likeCount"></span> |
-  <span>Average Rating: <span id="avgRating"></span> (<span id="ratingTotal"></span> ratings)</span>
-</div>
-<!-- Hidden file input for gallery uploads -->
-<input type="file" id="galleryUpload" accept="image/*" multiple style="display:none" />
-
-<!-- PASSWORD & UPLOAD MODAL -->
-<div id="uploadModal" class="modal-bg">
-  <div class="modal-box">
-    <h5>Enter Admin Password</h5>
-
-    <input type="password" id="adminPass" class="form-control mt-2" placeholder="Password">
-
-    <!-- Buttons -->
-    <div class="d-flex justify-content-between mt-3">
-      <button class="btn btn-secondary btn-sm" id="cancelBtn">Cancel</button>
-      <button class="btn btn-primary btn-sm" id="confirmPass">Continue</button>
-    </div>
-
-    <!-- Hidden upload section (shows after correct password) -->
-    <div id="uploadSection" style="display:none;">
-      <h6 class="mt-3">Upload Image</h6>
-
-      <!-- DROP AREA -->
-      <div id="dropArea">
-        <p>Drop image here or click to choose</p>
-        <input type="file" id="imageInput" accept="image/*" hidden>
-      </div>
-
-      <!-- Preview -->
-      <img id="previewImg" src="" class="img-fluid mt-3" style="display:none; border-radius:5px;"/>
-
-      <!-- Upload buttons -->
-      <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-secondary btn-sm" id="closeUpload">Close</button>
-        <button class="btn btn-success btn-sm" id="uploadImage">Upload</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
 </body>
-<script src="main.js" defer></script>
 </html>
