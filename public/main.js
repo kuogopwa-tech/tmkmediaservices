@@ -381,8 +381,10 @@ const UploadModal = {
     selectedFile: null,
 
     init() {
+        console.log('[UploadModal] init()');
         this.cacheElements();
         this.bindEvents();
+        console.log('[UploadModal] init() done, confirmPass:', !!this.elements.confirmPass);
     },
 
     cacheElements() {
@@ -437,7 +439,10 @@ const UploadModal = {
         elements.backToUpload.onclick = () => this.showUploadSection();
 
         // Password handling
-        elements.confirmPass.onclick = () => this.authenticate();
+        elements.confirmPass.onclick = () => {
+            console.log('[UploadModal] Continue clicked');
+            this.authenticate();
+        };
         elements.adminPass.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -554,22 +559,30 @@ const UploadModal = {
     },
 
     async authenticate() {
-        const password = this.elements.adminPass.value.trim();
-        
+        console.log('[UploadModal] authenticate() start');
+        const password = (this.elements.adminPass?.value || '').trim();
+
+        console.log('[UploadModal] password present:', !!password);
+
         if (!password) {
+            console.log('[UploadModal] No password entered -> showStatus');
             return this.showStatus("Please enter password", "error");
         }
 
         try {
+            console.log('[UploadModal] Sending POST /api/auth');
             const res = await fetch('/api/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password })
             });
 
+            console.log('[UploadModal] /api/auth response status:', res.status, 'ok:', res.ok);
+
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const result = await res.json();
+            console.log('[UploadModal] /api/auth response json:', result);
             
             if (result.authenticated) {
                 this.elements.passwordSection.style.display = "none";
@@ -581,6 +594,7 @@ const UploadModal = {
                 this.elements.adminPass.select();
             }
         } catch (err) {
+            console.log('[UploadModal] authenticate() catch');
             this.showStatus("Authentication failed. Please try again.", "error");
             console.error('Auth error:', err);
         }
@@ -765,22 +779,36 @@ const UploadModal = {
         xhr.addEventListener("load", () => {
             this.elements.uploadProgress.style.display = "none";
             
-            if (xhr.status === 200) {
-                try {
-                    const result = JSON.parse(xhr.responseText);
+            try {
+                const result = JSON.parse(xhr.responseText || "{}");
+
+                if (xhr.status === 200) {
                     if (result.success) {
-                        this.showStatus(`Image uploaded successfully!<br>${result.file.filename}`, "success");
+                        const filename =
+                            result?.file?.filename ||
+                            result?.public_id ||
+                            'upload complete';
+
+                        this.showStatus(
+                            `Image uploaded successfully!<br>${filename}`,
+                            "success"
+                        );
+
                         Gallery.load(); // Refresh gallery after upload
                         setTimeout(() => this.close(), 2000);
                     } else {
                         this.showStatus("Upload failed: " + (result.message || "unknown error"), "error");
                     }
-                } catch (e) {
-                    this.showStatus("Error parsing server response", "error");
+                } else {
+                    this.showStatus(
+                        `Upload failed: ${xhr.status}${result?.message ? ` - ${result.message}` : ''}`,
+                        "error"
+                    );
                 }
-            } else {
-                this.showStatus(`Upload failed: ${xhr.status}`, "error");
+            } catch (e) {
+                this.showStatus("Error parsing server response", "error");
             }
+
             this.elements.uploadImage.disabled = false;
         });
 
