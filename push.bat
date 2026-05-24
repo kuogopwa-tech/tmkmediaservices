@@ -5,6 +5,7 @@ echo Checking JavaScript syntax...
 node --check server.js || exit /b 1
 node --check lib\cloudinary.js || exit /b 1
 node --check public\main.js || exit /b 1
+for %%F in (api\*.js) do node --check "%%F" || exit /b 1
 
 REM Stage everything (including deletions)
 git add -A

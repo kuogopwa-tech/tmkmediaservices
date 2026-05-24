@@ -1,6 +1,7 @@
-import { kv } from '@vercel/kv';
+const { connectMongo } = require('../lib/mongo');
+const { ImageLike } = require('../lib/models');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -14,7 +15,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Image filename/id required" });
   }
 
-  const likes = await kv.incr(`likes:${imageKey}`);
+  await connectMongo();
+  const updated = await ImageLike.findOneAndUpdate(
+    { filename: imageKey },
+    { $inc: { likes: 1 } },
+    { upsert: true, new: true }
+  );
 
-  res.status(200).json({ success: true, likes });
-}
+  res.status(200).json({ success: true, likes: updated.likes });
+};

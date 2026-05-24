@@ -3,8 +3,8 @@ let totalLikes = 0;
 let ratings = [];
 let ratingSum = 0;
 
-export default function handler(req, res) {
-  const { action, value } = req.body;
+module.exports = function handler(req, res) {
+  const { action, value } = req.body || {};
 
   if (action === 'like') {
     totalLikes++;
@@ -26,4 +26,4 @@ export default function handler(req, res) {
     avgRating,
     ratings: ratings.length
   });
-}
+};

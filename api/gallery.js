@@ -1,7 +1,7 @@
 // pages/api/gallery.js
-import cloudinary from '../lib/cloudinary';
+const cloudinary = require('../lib/cloudinary');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     try {
         const result = await cloudinary.search
             .expression("folder:tmk_gallery")
@@ -22,4 +22,4 @@ export default async function handler(req, res) {
         console.error('❌ Cloudinary gallery error:', err);
         res.status(500).json({ error: "Failed to fetch gallery" });
     }
-}
+};

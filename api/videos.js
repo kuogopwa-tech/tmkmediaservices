@@ -1,7 +1,6 @@
-import dotenv from 'dotenv';
-dotenv.config();
+require('dotenv').config();
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const apiKey = process.env.YOUTUBE_API_KEY;
   const channelId = process.env.CHANNEL_ID;
 
@@ -57,4 +56,4 @@ export default async function handler(req, res) {
       }
     ]);
   }
-}
+};
