@@ -10,7 +10,7 @@ const { ImageLike, Counter, Admin } = require('./lib/models');
 
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
@@ -178,7 +178,7 @@ app.post('/api/counter', async (req, res) => {
 // GALLERY API (Cloudinary images + MongoDB likes)
 app.get('/api/gallery', async (req, res) => {
     try {
-        const cloudinary = require('./lib/cloudinary').default || require('./lib/cloudinary');
+        const cloudinary = require('./lib/cloudinary');
 
         const result = await cloudinary.search
             .expression('folder:tmk_gallery')
@@ -492,19 +492,4 @@ app.use((error, req, res, next) => {
 // Catch-all route for GET requests ONLY - MUST BE LAST
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-    console.log(`📁 Uploads directory: ${uploadsDir}`);
-    console.log(`🔍 Test route: http://localhost:${PORT}/test`);
-    console.log(`📤 Upload route: http://localhost:${PORT}/upload`);
-    console.log('\n📋 Available API endpoints:');
-    console.log('   GET  /api/videos');
-    console.log('   GET  /api/gallery');
-    console.log('   POST /api/gallery/like');
-    console.log('   GET  /api/counter');
-    console.log('   POST /api/counter');
-    console.log('   POST /api/auth');
-    console.log('   POST /upload');
 });

@@ -1,8 +1,14 @@
 @echo off
 setlocal EnableExtensions
 
+echo Checking JavaScript syntax...
+node --check server.js || exit /b 1
+node --check lib\cloudinary.js || exit /b 1
+node --check public\main.js || exit /b 1
+
 REM Stage everything (including deletions)
 git add -A
+git reset -- .env >nul 2>nul
 
 REM Check if there is anything to commit
 git diff --cached --quiet
