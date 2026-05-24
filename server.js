@@ -18,6 +18,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+function mountApiFunction(route, handlerPath) {
+    const handler = require(handlerPath);
+    app.all(route, (req, res) => handler(req, res));
+}
+
+// Mirror Vercel serverless functions during local Express development.
+mountApiFunction('/api/auth', './api/auth');
+mountApiFunction('/api/change-password', './api/change-password');
+mountApiFunction('/api/counter', './api/counter');
+mountApiFunction('/api/countyer-update', './api/countyer-update');
+mountApiFunction('/api/gallery', './api/gallery');
+mountApiFunction('/api/gallery-like', './api/gallery-like');
+mountApiFunction('/api/gallery/like', './api/gallery/like');
+mountApiFunction('/api/upload', './api/upload');
+mountApiFunction('/api/videos', './api/videos');
+
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -510,38 +526,21 @@ app.use((error, req, res, next) => {
     next();
 });
 
+// NOTE: We keep the catch-all at the very end.
+
+// You already have these endpoints implemented above:
+//   - GET/POST /api/counter
+//   - GET /api/gallery
+//   - POST /api/gallery/like
+//   - POST /api/auth
+//   - POST /api/auth/change-password
+//   - GET /api/videos
+//   - POST /upload
+//
+// Vercel still uses the files in /api/* directly; local Express mounts them above
+// so local testing follows the deployed API behavior.
+
 // Catch-all route for GET requests ONLY - MUST BE LAST
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.post('/api/upload', upload.single('image'), (req, res) => {
-    console.log('API upload endpoint hit!');
-    console.log('File received:', req.file);
-
-    try {
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: 'No file uploaded'
-            });
-        }
-
-        res.json({
-            success: true,
-            message: 'File uploaded successfully',
-            file: {
-                filename: req.file.filename,
-                originalName: req.file.originalname,
-                size: req.file.size,
-                path: `/uploads/${req.file.filename}`
-            }
-        });
-    } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Upload failed: ' + error.message
-        });
-    }
 });
