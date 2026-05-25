@@ -1,35 +1,52 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions EnableDelayedExpansion
 
-echo Checking JavaScript syntax...
-node --check server.js || exit /b 1
-node --check lib\cloudinary.js || exit /b 1
-node --check public\main.js || exit /b 1
-for /r api %%F in (*.js) do node --check "%%F" || exit /b 1
+echo ==========================================
+echo  Push Script - Stage, Commit, Push
+echo ==========================================
 
-REM Stage everything (including deletions)
-git add -A
+echo [1/5] Checking JavaScript syntax...
+node --check server.js || (echo Syntax check failed: server.js & exit /b 1)
+node --check lib\cloudinary.js || (echo Syntax check failed: lib\cloudinary.js & exit /b 1)
+node --check public\main.js || (echo Syntax check failed: public\main.js & exit /b 1)
+for /r api %%F in (*.js) do (
+  node --check "%%F" || (echo Syntax check failed: %%F & exit /b 1)
+)
+
+echo [2/5] Staging all changes (including deletions)...
+git add -A || (echo Failed to stage changes. & exit /b 1)
+
+REM Always keep .env out of staged changes (if present)
 git reset -- .env >nul 2>nul
 
-REM Check if there is anything to commit
+echo [3/5] Detecting current branch...
+for /f "delims=" %%B in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "BRANCH=%%B"
+if not defined BRANCH (
+  echo Failed to detect current branch.
+  exit /b 1
+)
+echo Current branch: %BRANCH%
+
+echo [4/5] Commit if there are staged changes...
 git diff --cached --quiet
 if %errorlevel%==0 (
   echo No changes to commit.
 ) else (
   echo Committing changes...
-  git commit -m "auto update" || exit /b 1
+  git commit -m "auto update" || (echo Commit failed. & exit /b 1)
 )
 
-echo Pushing to remote...
-git push
-if %errorlevel% neq 0 (
-  echo.
-  echo Push failed. If your branch has no upstream set, run:
-  echo   git push --set-upstream origin <branch>
-  pause
-  exit /b %errorlevel%
+echo [5/5] Pushing to remote...
+git rev-parse --abbrev-ref --symbolic-full-name @{u} >nul 2>nul
+if %errorlevel%==0 (
+  echo Upstream exists. Running: git push
+  git push || (echo Push failed. & exit /b 1)
+) else (
+  echo No upstream set. Running: git push --set-upstream origin %BRANCH%
+  git push --set-upstream origin %BRANCH% || (echo Push with upstream failed. & exit /b 1)
 )
 
-echo Done.
-pause
+echo.
+echo ✅ Done. All eligible changes have been pushed.
+exit /b 0
 
