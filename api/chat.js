@@ -133,8 +133,8 @@ async function chatWithRetryAndFallback({ baseUrl, apiKey, messages, models }) {
     }
   }
 
-  const finalStatus = lastError?.status || 500;
-  if (finalStatus === 429) {
+  const sawAny429 = models.length > 0 && Number(lastError?.status) === 429;
+  if (sawAny429) {
     const busyErr = new Error('AI provider is temporarily busy. Please try again shortly.');
     busyErr.status = 429;
     busyErr.retryAfterSeconds = lastError?.retryAfterSeconds || 2;
