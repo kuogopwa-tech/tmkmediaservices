@@ -16,9 +16,6 @@ for /r api %%F in (*.js) do (
 echo [2/5] Staging all changes (including deletions)...
 git add -A || (echo Failed to stage changes. & exit /b 1)
 
-REM Always keep .env out of staged changes (if present)
-git reset -- .env >nul 2>nul
-
 echo [3/5] Detecting current branch...
 for /f "delims=" %%B in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "BRANCH=%%B"
 if not defined BRANCH (
