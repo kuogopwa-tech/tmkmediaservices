@@ -292,62 +292,9 @@ app.post('/api/gallery/like', async (req, res) => {
 });
 
 
-// --- Admin auth via MongoDB ---
-let adminPassword = null;
-
-async function refreshAdminPasswordCache() {
-    const doc = await Admin.findById('main').lean();
-    adminPassword = doc?.password || 'tmk@2025';
-}
-
-app.post('/api/auth', async (req, res) => {
-    try {
-        const { password } = req.body;
-
-        if (!password) {
-            return res.json({ authenticated: false, message: 'Password required' });
-        }
-
-        await refreshAdminPasswordCache();
-
-        if (password === adminPassword) {
-            res.json({ authenticated: true });
-        } else {
-            res.json({ authenticated: false, message: 'Incorrect password' });
-        }
-    } catch (error) {
-        console.error('Auth error:', error);
-        res.status(500).json({ authenticated: false, message: 'Authentication failed' });
-    }
-});
-
-app.post('/api/auth/change-password', async (req, res) => {
-    try {
-        const { currentPassword, newPassword } = req.body;
-
-        if (!currentPassword || !newPassword) {
-            return res.json({ success: false, message: 'Both current and new password are required' });
-        }
-
-        await refreshAdminPasswordCache();
-
-        if (currentPassword !== adminPassword) {
-            return res.json({ success: false, message: 'Current password is incorrect' });
-        }
-
-        if (newPassword.length < 4) {
-            return res.json({ success: false, message: 'New password must be at least 4 characters' });
-        }
-
-        await Admin.findByIdAndUpdate('main', { password: newPassword }, { upsert: true, new: true });
-
-        console.log('✅ Admin password changed successfully');
-        res.json({ success: true, message: 'Password changed successfully' });
-    } catch (error) {
-        console.error('Change password error:', error);
-        res.status(500).json({ success: false, message: 'Failed to change password' });
-    }
-});
+// Auth endpoints are handled by mounted serverless-style API functions above:
+//   mountApiFunction('/api/auth', './api/auth')
+//   mountApiFunction('/api/change-password', './api/change-password')
 
 
 // UPLOAD ROUTE
