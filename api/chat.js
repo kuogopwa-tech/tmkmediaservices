@@ -74,6 +74,9 @@ async function openAiCompatibleChat({ baseUrl, apiKey, model, messages }) {
       timeoutErr.code = 'TIMEOUT';
       throw timeoutErr;
     }
+    if (Number(err?.status) === 429) {
+      throw err;
+    }
     const netErr = new Error(`AI provider request failed: ${err.message}`);
     netErr.code = 'NETWORK';
     throw netErr;
