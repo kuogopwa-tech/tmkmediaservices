@@ -147,6 +147,21 @@
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   animation: modalFadeIn 0.3s ease-out;
+  position: relative;
+  z-index: 10000;
+}
+
+/* Ensure modal action controls always remain clickable */
+#uploadModal .btn,
+#uploadModal input,
+#uploadModal label,
+#uploadModal #confirmPass,
+#uploadModal #cancelBtn,
+#uploadModal #closeUpload,
+#uploadModal #uploadImage {
+  position: relative;
+  z-index: 10001;
+  pointer-events: auto;
 }
 
 @keyframes modalFadeIn {
