@@ -164,6 +164,13 @@
   pointer-events: auto;
 }
 
+/* Keep password action row above any overlapping content */
+#passwordSection .d-flex.justify-content-between.gap-2.mt-4 {
+  position: relative;
+  z-index: 10002;
+  pointer-events: auto;
+}
+
 @keyframes modalFadeIn {
   from { 
     opacity: 0; 

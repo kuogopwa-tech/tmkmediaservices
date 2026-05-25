@@ -439,10 +439,15 @@ const UploadModal = {
         elements.backToUpload.onclick = () => this.showUploadSection();
 
         // Password handling
-        elements.confirmPass.onclick = () => {
-            console.log('[UploadModal] Continue clicked');
-            this.authenticate();
-        };
+        if (elements.confirmPass) {
+            elements.confirmPass.type = 'button';
+            elements.confirmPass.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('[UploadModal] Continue clicked');
+                this.authenticate();
+            });
+        }
         elements.adminPass.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
