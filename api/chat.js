@@ -160,31 +160,10 @@ module.exports = async function handler(req, res) {
     const primaryModel = String(process.env.BLACKBOX_MODEL || '').trim();
     const fallbackModel = String(process.env.BLACKBOX_FALLBACK_MODEL || '').trim();
 
-    if (!blackboxBaseUrl) {
+    if (!blackboxBaseUrl || !blackboxApiKey || !primaryModel || !fallbackModel) {
       return res.status(500).json({
         ok: false,
-        error: 'Chat not configured: missing BLACKBOX_BASE_URL.',
-      });
-    }
-
-    if (!blackboxApiKey) {
-      return res.status(500).json({
-        ok: false,
-        error: 'Chat not configured: missing BLACKBOX_API_KEY.',
-      });
-    }
-
-    if (!primaryModel) {
-      return res.status(500).json({
-        ok: false,
-        error: 'Chat not configured: missing BLACKBOX_MODEL.',
-      });
-    }
-
-    if (!fallbackModel) {
-      return res.status(500).json({
-        ok: false,
-        error: 'Chat not configured: missing BLACKBOX_FALLBACK_MODEL.',
+        error: 'Blackbox API configuration missing',
       });
     }
 
