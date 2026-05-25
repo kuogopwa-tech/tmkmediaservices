@@ -22,6 +22,12 @@
 - [x] Align auth endpoint messaging/error handling in `api/auth.js`
 - [x] Sanity-check updated flows and mark completion
 
+## New task: Enforce Blackbox-only chat provider config
+- [x] Remove all legacy AI_PROVIDER/AI_* compatibility logic from `api/chat.js`
+- [x] Validate required `BLACKBOX_*` variables with clean JSON errors
+- [x] Keep retry + fallback + non-hanging error response behavior
+- [ ] Re-test `/api/chat` method guard, payload guard, and success path
+
 ## New task: Production-grade AI provider 429 retry + fallback handling
 - [x] Add explicit 429 detection + Retry-After parsing in `api/chat.js`
 - [x] Retry primary model once after provider delay, then fallback models

@@ -33,19 +33,30 @@ async function openAiCompatibleChat({ baseUrl, apiKey, model, messages }) {
   const headers = { 'Content-Type': 'application/json' };
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
-  if (normalizedBaseUrl.includes('openrouter.ai')) {
-    const siteUrl =
-      process.env.APP_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
-      '';
-    const appName = process.env.APP_NAME || 'tmkmediaservices';
-    if (siteUrl) headers['HTTP-Referer'] = siteUrl;
-    headers['X-Title'] = appName;
-  }
-
   const { controller, timeout } = withTimeout(30000);
   let resp;
   try {
+    const __CHAT_TEST_MODE__ = String(process.env.CHAT_TEST_MODE || '').trim();
+    if (__CHAT_TEST_MODE__ === 'FORCE_429') {
+      const forcedErr = new Error('AI provider is temporarily busy. Please try again shortly.');
+      forcedErr.status = 429;
+      forcedErr.retryAfterSeconds = 2;
+      throw forcedErr;
+    }
+    if (__CHAT_TEST_MODE__ === 'FORCE_TIMEOUT') {
+      const forcedErr = new Error('AI provider request timed out. Please try again.');
+      forcedErr.code = 'TIMEOUT';
+      throw forcedErr;
+    }
+    if (
+      __CHAT_TEST_MODE__ === 'FORCE_PRIMARY_FAIL' &&
+      model === String(process.env.BLACKBOX_MODEL || '').trim()
+    ) {
+      const forcedErr = new Error('Forced primary failure for fallback test');
+      forcedErr.status = 500;
+      throw forcedErr;
+    }
+
     resp = await fetch(url, {
       method: 'POST',
       headers,
@@ -141,57 +152,46 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const provider = (process.env.AI_PROVIDER || 'openai_compat').toLowerCase();
+    const blackboxBaseUrl = normalizeBaseUrl(process.env.BLACKBOX_BASE_URL || '');
+    const blackboxApiKey = String(process.env.BLACKBOX_API_KEY || '').trim();
+    const primaryModel = String(process.env.BLACKBOX_MODEL || '').trim();
+    const fallbackModel = String(process.env.BLACKBOX_FALLBACK_MODEL || '').trim();
 
-    const aiBaseUrl = normalizeBaseUrl(
-      process.env.BLACKBOX_BASE_URL ||
-      process.env.AI_BASE_URL ||
-      'https://api.blackbox.ai'
+    if (!blackboxBaseUrl) {
+      return res.status(500).json({
+        ok: false,
+        error: 'Chat not configured: missing BLACKBOX_BASE_URL.',
+      });
+    }
+
+    if (!blackboxApiKey) {
+      return res.status(500).json({
+        ok: false,
+        error: 'Chat not configured: missing BLACKBOX_API_KEY.',
+      });
+    }
+
+    if (!primaryModel) {
+      return res.status(500).json({
+        ok: false,
+        error: 'Chat not configured: missing BLACKBOX_MODEL.',
+      });
+    }
+
+    if (!fallbackModel) {
+      return res.status(500).json({
+        ok: false,
+        error: 'Chat not configured: missing BLACKBOX_FALLBACK_MODEL.',
+      });
+    }
+
+    const modelChain = [primaryModel, fallbackModel].filter(
+      (v, i, arr) => !!v && arr.indexOf(v) === i
     );
-    const apiKey = process.env.BLACKBOX_API_KEY || process.env.AI_API_KEY || '';
-
-    const primaryModel =
-      process.env.BLACKBOX_MODEL ||
-      process.env.AI_MODEL ||
-      'blackboxai/openai/gpt-4.1-mini';
-
-    const fallbackModel = process.env.BLACKBOX_FALLBACK_MODEL || 'blackboxai/claude-sonnet-4';
-
-    const isBlackboxProvider = aiBaseUrl.includes('api.blackbox.ai');
-
-    const modelChain = isBlackboxProvider
-      ? [primaryModel, fallbackModel].filter((v, i, arr) => !!v && arr.indexOf(v) === i)
-      : [
-          primaryModel,
-          fallbackModel,
-          'deepseek/deepseek-chat:free',
-          'meta-llama/llama-3.3-8b-instruct:free',
-        ].filter((v, i, arr) => !!v && arr.indexOf(v) === i);
-
-    if (!provider || provider !== 'openai_compat') {
-      return res.status(500).json({
-        ok: false,
-        error: 'AI chat not configured: set AI_PROVIDER=openai_compat.',
-      });
-    }
-
-    if (!aiBaseUrl) {
-      return res.status(500).json({
-        ok: false,
-        error: 'AI chat not configured: set BLACKBOX_BASE_URL (or AI_BASE_URL).',
-      });
-    }
-
-    if (!apiKey) {
-      return res.status(500).json({
-        ok: false,
-        error: 'AI chat not configured: set BLACKBOX_API_KEY (or AI_API_KEY).',
-      });
-    }
 
     const { out, model, usedFallback } = await chatWithRetryAndFallback({
-      baseUrl: aiBaseUrl,
-      apiKey,
+      baseUrl: blackboxBaseUrl,
+      apiKey: blackboxApiKey,
       messages,
       models: modelChain,
     });
