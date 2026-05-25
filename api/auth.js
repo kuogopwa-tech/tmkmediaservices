@@ -6,10 +6,13 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ authenticated: false, message: 'Method not allowed' });
   }
 
-  const { password } = req.body || {};
+  const password = String(req.body?.password || '').trim();
 
   if (!password) {
-    return res.json({ authenticated: false, message: 'Password required' });
+    return res.status(400).json({
+      authenticated: false,
+      message: 'Please enter your admin password.'
+    });
   }
 
   try {
@@ -21,9 +24,15 @@ module.exports = async function handler(req, res) {
       return res.json({ authenticated: true });
     }
 
-    res.json({ authenticated: false, message: 'Incorrect password' });
+    return res.status(401).json({
+      authenticated: false,
+      message: 'Incorrect password. Please try again.'
+    });
   } catch (error) {
     console.error('Auth error:', error);
-    res.status(500).json({ authenticated: false, message: 'Authentication failed' });
+    return res.status(500).json({
+      authenticated: false,
+      message: 'Authentication is temporarily unavailable. Please try again.'
+    });
   }
 };

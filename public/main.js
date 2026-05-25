@@ -571,7 +571,13 @@ const UploadModal = {
 
         if (!password) {
             console.log('[UploadModal] No password entered -> showStatus');
-            return this.showStatus("Please enter password", "error");
+            return this.showStatus("Please enter your admin password.", "error");
+        }
+
+        const confirmBtn = this.elements.confirmPass;
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Checking...';
         }
 
         try {
@@ -584,30 +590,46 @@ const UploadModal = {
 
             console.log('[UploadModal] /api/auth response status:', res.status, 'ok:', res.ok);
 
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const result = await res.json();
+            let result = {};
+            try {
+                result = await res.json();
+            } catch (parseErr) {
+                console.warn('[UploadModal] Failed to parse auth response JSON:', parseErr);
+            }
             console.log('[UploadModal] /api/auth response json:', result);
-            
-            if (result.authenticated) {
+
+            if (res.ok && result.authenticated) {
                 this.elements.passwordSection.style.display = "none";
                 this.elements.uploadSection.style.display = "block";
                 this.hideStatus();
-            } else {
-                this.showStatus(result.message || "Incorrect password!", "error");
-                this.elements.adminPass.focus();
-                this.elements.adminPass.select();
+                return;
             }
+
+            if (res.status === 429) {
+                this.showStatus("Too many attempts. Please wait a moment and try again.", "error");
+            } else if (res.status >= 500) {
+                this.showStatus("Server error while verifying password. Please try again.", "error");
+            } else {
+                this.showStatus(result.message || "Incorrect password. Please try again.", "error");
+            }
+
+            this.elements.adminPass.focus();
+            this.elements.adminPass.select();
         } catch (err) {
             console.log('[UploadModal] authenticate() catch');
-            this.showStatus("Authentication failed. Please try again.", "error");
+            this.showStatus("Unable to verify password right now. Check your connection and try again.", "error");
             console.error('Auth error:', err);
+        } finally {
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-lock-open me-1"></i> Continue';
+            }
         }
     },
 
     async changePassword() {
         if (!this.elements.currentPassword || !this.elements.newPassword || !this.elements.confirmNewPassword) {
-            return this.showStatus("Password change not available", "error");
+            return this.showStatus("Password change is currently unavailable.", "error");
         }
 
         const currentPassword = this.elements.currentPassword.value.trim();
@@ -615,15 +637,23 @@ const UploadModal = {
         const confirmNewPassword = this.elements.confirmNewPassword.value.trim();
 
         if (!currentPassword || !newPassword || !confirmNewPassword) {
-            return this.showStatus("Please fill all password fields", "error");
+            return this.showStatus("Please fill in current, new, and confirm password fields.", "error");
         }
 
         if (newPassword !== confirmNewPassword) {
-            return this.showStatus("New passwords do not match", "error");
+            return this.showStatus("New password and confirmation do not match.", "error");
         }
 
-        if (newPassword.length < 4) {
-            return this.showStatus("New password must be at least 4 characters", "error");
+        if (newPassword === currentPassword) {
+            return this.showStatus("New password must be different from current password.", "error");
+        }
+
+        if (newPassword.length < 8) {
+            return this.showStatus("New password must be at least 8 characters long.", "error");
+        }
+
+        if (!/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword)) {
+            return this.showStatus("New password must include at least one letter and one number.", "error");
         }
 
         try {
@@ -639,32 +669,35 @@ const UploadModal = {
                 body: JSON.stringify({ currentPassword, newPassword })
             });
 
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            let result = {};
+            try {
+                result = await res.json();
+            } catch (parseErr) {
+                console.warn('Failed to parse change-password response JSON:', parseErr);
+            }
 
-            const result = await res.json();
-            
-            if (result.success) {
+            if (res.ok && result.success) {
                 this.showStatus("✅ Password changed successfully! Returning to upload...", "success");
                 
-                // Clear all fields
                 if (this.elements.currentPassword) this.elements.currentPassword.value = "";
                 if (this.elements.newPassword) this.elements.newPassword.value = "";
                 if (this.elements.confirmNewPassword) this.elements.confirmNewPassword.value = "";
                 
-                // Reset button
                 if (this.elements.saveNewPassword) {
                     this.elements.saveNewPassword.disabled = false;
                     this.elements.saveNewPassword.innerHTML = '<i class="fas fa-save me-1"></i> Save Password';
                 }
                 
-                // Auto-return to upload after 2 seconds
                 setTimeout(() => {
                     this.showUploadSection();
                     this.hideStatus();
                 }, 2000);
                 
             } else {
-                this.showStatus("❌ " + (result.message || "Failed to change password"), "error");
+                const fallbackMessage = res.status >= 500
+                    ? "Server error while changing password. Please try again."
+                    : "Could not change password. Please check your inputs.";
+                this.showStatus("❌ " + (result.message || fallbackMessage), "error");
                 if (this.elements.saveNewPassword) {
                     this.elements.saveNewPassword.disabled = false;
                     this.elements.saveNewPassword.innerHTML = '<i class="fas fa-save me-1"></i> Save Password';
@@ -675,7 +708,7 @@ const UploadModal = {
                 }
             }
         } catch (err) {
-            this.showStatus("❌ Network error. Please check connection and try again.", "error");
+            this.showStatus("❌ Network error. Please check your connection and try again.", "error");
             console.error('Change password error:', err);
             if (this.elements.saveNewPassword) {
                 this.elements.saveNewPassword.disabled = false;
