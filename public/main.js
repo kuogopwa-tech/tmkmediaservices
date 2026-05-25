@@ -379,6 +379,7 @@ const Gallery = {
 const UploadModal = {
     elements: {},
     selectedFile: null,
+    isAuthenticating: false,
 
     init() {
         console.log('[UploadModal] init()');
@@ -448,12 +449,14 @@ const UploadModal = {
                 this.authenticate();
             });
         }
-        elements.adminPass.addEventListener('keydown', e => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                this.authenticate();
-            }
-        });
+        if (elements.adminPass) {
+            elements.adminPass.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.authenticate();
+                }
+            });
+        }
 
         // Password change handling
         elements.changePassBtn.onclick = () => this.showChangePasswordSection();
@@ -571,8 +574,17 @@ const UploadModal = {
 
         if (!password) {
             console.log('[UploadModal] No password entered -> showStatus');
-            return this.showStatus("Please enter your admin password.", "error");
+            this.showStatus("Please enter your admin password.", "error");
+            if (this.elements.adminPass) {
+                this.elements.adminPass.focus();
+            }
+            return;
         }
+
+        if (this.isAuthenticating) {
+            return;
+        }
+        this.isAuthenticating = true;
 
         const confirmBtn = this.elements.confirmPass;
         if (confirmBtn) {
@@ -599,8 +611,7 @@ const UploadModal = {
             console.log('[UploadModal] /api/auth response json:', result);
 
             if (res.ok && result.authenticated) {
-                this.elements.passwordSection.style.display = "none";
-                this.elements.uploadSection.style.display = "block";
+                this.showUploadSection();
                 this.hideStatus();
                 return;
             }
@@ -609,17 +620,24 @@ const UploadModal = {
                 this.showStatus("Too many attempts. Please wait a moment and try again.", "error");
             } else if (res.status >= 500) {
                 this.showStatus("Server error while verifying password. Please try again.", "error");
-            } else {
+            } else if (res.status === 400) {
+                this.showStatus(result.message || "Please enter your admin password.", "error");
+            } else if (res.status === 401) {
                 this.showStatus(result.message || "Incorrect password. Please try again.", "error");
+            } else {
+                this.showStatus(result.message || "Authentication failed. Please try again.", "error");
             }
 
-            this.elements.adminPass.focus();
-            this.elements.adminPass.select();
+            if (this.elements.adminPass) {
+                this.elements.adminPass.focus();
+                this.elements.adminPass.select();
+            }
         } catch (err) {
             console.log('[UploadModal] authenticate() catch');
             this.showStatus("Unable to verify password right now. Check your connection and try again.", "error");
             console.error('Auth error:', err);
         } finally {
+            this.isAuthenticating = false;
             if (confirmBtn) {
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = '<i class="fas fa-lock-open me-1"></i> Continue';
