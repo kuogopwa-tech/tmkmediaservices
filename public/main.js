@@ -950,30 +950,52 @@ const ChatWidget = {
     this.elements.input.value = '';
     this.pushUser(text);
 
-    // Keep context bounded
     const context = this.messages.slice(-12);
+    const sendBtn = this.elements.send;
+    if (sendBtn) sendBtn.disabled = true;
+
+    this.pushAssistant('...');
+    let removedLoading = false;
+    const removeLoading = () => {
+      if (!removedLoading && this.messages.length > 0) {
+        this.messages.pop();
+        removedLoading = true;
+      }
+    };
 
     try {
-      this.pushAssistant('...');
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: context }),
       });
 
-      const data = await res.json();
-      this.messages.pop(); // remove "..."
+      let data = {};
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        console.warn('Chat response parse error:', parseErr);
+      }
+
+      removeLoading();
 
       if (!res.ok || !data?.ok) {
+        if (res.status === 429 || data?.retrying) {
+          const retrySecs = Number(data?.retryAfterSeconds || 2);
+          this.pushAssistant(`AI provider is temporarily busy, retrying... (about ${retrySecs}s)`);
+        }
         this.pushAssistant(data?.error || `Chat failed (HTTP ${res.status})`);
         return;
       }
 
       this.pushAssistant(data.content || '');
     } catch (err) {
-      this.messages.pop(); // remove "..."
+      removeLoading();
       this.pushAssistant('Chat error. Check AI env config and try again.');
       console.error('Chat error:', err);
+    } finally {
+      if (sendBtn) sendBtn.disabled = false;
+      this.render();
     }
   }
 };

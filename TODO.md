@@ -21,3 +21,16 @@
 - [x] Add robust server-side validation/error handling in `api/change-password.js`
 - [x] Align auth endpoint messaging/error handling in `api/auth.js`
 - [x] Sanity-check updated flows and mark completion
+
+## New task: Production-grade AI provider 429 retry + fallback handling
+- [x] Add explicit 429 detection + Retry-After parsing in `api/chat.js`
+- [x] Retry primary model once after provider delay, then fallback models
+- [x] Add detailed provider attempt logging in `api/chat.js`
+- [x] Keep chat UI responsive and show busy/retrying message in `public/main.js`
+- [ ] Re-test `/api/chat` method/payload/normal flow and capture behavior
+
+## New task: Switch chat provider to Blackbox paid API
+- [ ] Update `api/chat.js` env resolution to prioritize `BLACKBOX_*` vars
+- [ ] Keep retry + fallback behavior intact with Blackbox model chain
+- [ ] Improve config error text to include Blackbox env names
+- [ ] Re-test `/api/chat` (GET/invalid POST/normal POST) after restart
